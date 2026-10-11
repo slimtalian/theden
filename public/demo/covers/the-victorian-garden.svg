@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 595" role="img" aria-labelledby="title desc">
+<title id="title">The Victorian Garden</title>
+<desc id="desc">Original demo cover. The Den Editions. A modern sample essay about the nineteenth century.</desc>
+<rect width="420" height="595" fill="#4f6959"/>
+<path d="M0 0H15V595H0Z" fill="#000" opacity=".16"/>
+<path d="M20 0V595" stroke="#d8bb80" opacity=".3"/>
+<rect x="35" y="30" width="355" height="533" rx="1" fill="none" stroke="#d8bb80" stroke-opacity=".55"/>
+<path d="M47 74H378 M47 500H378" stroke="#d8bb80" stroke-opacity=".55"/>
+<g fill="#f5efdf" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif">
+<text x="218" y="59" font-family="Arial, sans-serif" font-size="9" letter-spacing="3">THE NINETEENTH CENTURY</text>
+<text x="218" y="162" font-size="39">The Victorian</text>
+<text x="218" y="208" font-size="39">Garden</text>
+<text x="218" y="414" font-family="Arial, sans-serif" font-size="9" letter-spacing="2">EVERYDAY LIFE</text>
+<text x="218" y="451" font-size="18">The Den Editions</text>
+<text x="218" y="528" font-family="Arial, sans-serif" font-size="9" letter-spacing="2">ORIGINAL SAMPLE ESSAY</text>
+</g>
+<g transform="translate(158, 261)" fill="none" stroke="#d8bb80" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="60" y1="14" x2="60" y2="106"/>
+<line x1="39" y1="106" x2="81" y2="106"/>
+<line x1="60" y1="45" x2="44" y2="30"/>
+<line x1="60" y1="45" x2="76" y2="30"/>
+<line x1="60" y1="62" x2="37" y2="47"/>
+<line x1="60" y1="62" x2="83" y2="47"/>
+<line x1="60" y1="79" x2="32" y2="64"/>
+<line x1="60" y1="79" x2="88" y2="64"/>
+<line x1="60" y1="96" x2="38" y2="81"/>
+<line x1="60" y1="96" x2="82" y2="81"/></g>
+<circle cx="218" cy="477" r="2" fill="#d8bb80"/>
+</svg>
