@@ -1,0 +1,123 @@
+:root {
+  color-scheme: light;
+  --page-margin: 0 auto 22px;
+  --page-border: 0;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #121914;
+}
+[hidden] {
+  display: none !important;
+}
+#viewerContainer {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #666e5b #18201a;
+}
+#viewerContainer:focus-visible {
+  outline: 1px solid #bbaa7e;
+  outline-offset: -2px;
+}
+.pdfViewer {
+  padding: 20px 0 32px;
+}
+.pdfViewer .page {
+  border: 0;
+  box-shadow: 0 5px 18px #0006;
+}
+#viewerContainer.page-flip:not(.page-pannable) {
+  touch-action: pan-y pinch-zoom;
+  overflow: hidden;
+}
+#viewerContainer.page-flip {
+  inset: 14px 0;
+}
+.page-flip .pdfViewer {
+  min-height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+.page-flip .pdfViewer .page {
+  flex-shrink: 0;
+  margin: 0 auto;
+}
+.page-flip.page-pannable .pdfViewer {
+  align-items: flex-start;
+}
+#page-edges {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+.page-edge {
+  position: absolute;
+  width: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #bdaa7f;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+.page-edge span {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 52px;
+  margin: auto;
+  font:
+    30px Georgia,
+    serif;
+  color: #d8c69b;
+  background: #1b241df0;
+  border: 1px solid #bdaa7f55;
+  border-radius: 18px;
+  box-shadow: 0 3px 12px #0003;
+  transition:
+    background 0.18s,
+    transform 0.18s;
+}
+.page-edge:hover:not(:disabled) {
+  background: linear-gradient(90deg, #bdaa7f12, transparent);
+}
+.page-edge.next:hover:not(:disabled) {
+  background: linear-gradient(270deg, #bdaa7f12, transparent);
+}
+.page-edge:hover:not(:disabled) span {
+  background: #35412e;
+  transform: translateX(-2px);
+}
+.page-edge.next:hover:not(:disabled) span {
+  transform: translateX(2px);
+}
+.page-edge:focus-visible {
+  outline: 2px solid #bdaa7f;
+  outline-offset: -2px;
+  border-radius: 3px;
+}
+.page-edge:disabled {
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.25;
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-edge span {
+    transition: none;
+  }
+}
+@media (max-width: 600px) {
+  :root {
+    --page-margin: 0 auto 14px;
+  }
+  .pdfViewer {
+    padding-top: 10px;
+  }
+}

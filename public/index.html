@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en" data-mode="local">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="The Den — your local personal library, managed by calibre."
+    />
+    <title>The Den · Your library</title>
+    <link rel="icon" href="./books-mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./book.css" />
+    <link rel="stylesheet" href="./reader.css" />
+    <link rel="stylesheet" href="./polish.css" />
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#library-main">Skip to the library</a>
+    <div class="app">
+      <header class="header">
+        <a class="brand" href="./" aria-label="The Den home"
+          ><img
+            class="books-mark"
+            src="./books-mark.svg"
+            alt=""
+            width="64"
+            height="44"
+        /></a>
+        <div class="header-actions">
+          <span class="local-label"
+            ><span class="status-dot"></span>On your computer</span
+          ><button
+            class="quiet"
+            id="settings-button"
+            aria-label="Library settings"
+          >
+            <span aria-hidden="true">⚙</span> Library</button
+          ><button class="primary" id="add-button">
+            <span aria-hidden="true">＋</span> Add books
+          </button>
+        </div>
+      </header>
+      <section class="toolbar" aria-label="Library tools">
+        <label class="search"
+          ><svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="10" cy="10" r="6.5" />
+            <path d="m15 15 5 5" /></svg
+          ><input
+            id="search"
+            type="search"
+            placeholder="Find a title, author, or category…"
+            aria-label="Search your library"
+          /><kbd>/</kbd></label
+        >
+        <div class="toolbar-right">
+          <button
+            class="quiet"
+            id="refresh-button"
+            aria-label="Refresh from calibre"
+          >
+            ↻ <span>Refresh</span></button
+          ><label class="sr-only" for="sort">Sort books</label
+          ><select id="sort">
+            <option value="title">Title A–Z</option>
+            <option value="author">Author A–Z</option>
+            <option value="newest">Newest first</option>
+          </select>
+          <div class="view-picker" aria-label="Library view">
+            <button data-view="shelves" aria-pressed="true">Shelves</button
+            ><button data-view="catalogue" aria-pressed="false">
+              Catalogue
+            </button>
+          </div>
+        </div>
+      </section>
+      <div class="workspace" id="workspace">
+        <aside class="sidebar">
+          <span class="eyebrow">Your collection</span>
+          <nav id="categories" aria-label="Categories"></nav>
+          <div class="sidebar-bottom">
+            <div class="sidebar-quote">Keep a page.<br />Follow a thought.</div>
+            <span class="eyebrow">A companion to</span
+            ><a
+              class="tumbleweed"
+              href="https://slimtalian.github.io/tumbleweed/"
+              target="_blank"
+              rel="noreferrer"
+              >Tumbleweed ↗</a
+            >
+          </div>
+        </aside>
+        <main id="library-main" tabindex="-1">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">The library wall</span>
+              <h1>Room for curiosity.</h1>
+            </div>
+            <span class="count" id="book-count">0 volumes</span>
+          </div>
+          <div class="result-line" id="result-line" aria-live="polite">
+            Loading your library…
+          </div>
+          <div id="demo-notice" class="demo-notice" hidden>
+            <p>
+              <strong>Six small books. A century of change.</strong> Original
+              sample essays about life in the 1800s. Pick a spine and settle in.
+            </p>
+            <a
+              href="https://github.com/slimtalian/theden"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Make a library of your own ↗</a
+            >
+          </div>
+          <div id="empty-state" class="empty-state" hidden>
+            <span class="empty-mark" aria-hidden="true">Ⅰ Ⅱ Ⅲ</span>
+            <h2>Your shelves begin here.</h2>
+            <p>
+              Add a PDF or EPUB, or manage this collection in calibre.<br />Your
+              originals stay where you found them.
+            </p>
+            <button class="primary" id="first-book">
+              Add your first book <span aria-hidden="true">＋</span></button
+            ><span class="empty-note">Drop files anywhere on the library</span>
+          </div>
+          <div id="no-results" class="no-results" hidden>
+            <h2>No books found.</h2>
+            <p>Try another title, author, or category.</p>
+            <button class="quiet" id="clear-filters">Clear filters</button>
+          </div>
+          <section
+            id="shelves"
+            class="shelves"
+            aria-label="Book shelves"
+          ></section>
+          <section
+            id="catalogue"
+            class="catalogue"
+            aria-label="Book catalogue"
+            hidden
+          ></section>
+          <div class="shelf-footer">
+            <span id="shelf-hint">A quiet place for a growing collection.</span
+            ><label class="motion"
+              ><input type="checkbox" id="motion" checked /> Gentle
+              motion</label
+            >
+          </div>
+        </main>
+        <aside
+          id="inspector"
+          class="inspector"
+          aria-label="Selected book"
+          hidden
+        >
+          <div class="inspector-heading">
+            <span class="eyebrow">In your hands</span
+            ><button
+              class="icon-button"
+              id="close-inspector"
+              aria-label="Return book to shelf"
+            >
+              ×
+            </button>
+          </div>
+          <div
+            class="stage"
+            id="book-stage"
+            aria-label="Drag horizontally to turn the book"
+          >
+            <div class="book-shadow"></div>
+            <div class="book-object" id="book-object" aria-hidden="true">
+              <div class="face front">
+                <span class="cover-label">THE DEN</span
+                ><span class="cover-title" id="cover-title"></span
+                ><span class="cover-ornament">❧</span
+                ><span class="cover-author" id="cover-author"></span>
+              </div>
+              <div class="face back">
+                <span class="cover-label">FROM YOUR LIBRARY</span
+                ><span id="back-title"></span><span id="back-author"></span
+                ><span class="back-mark">d.</span>
+              </div>
+              <div class="face spine"><span id="object-spine"></span></div>
+              <div class="face pages"></div>
+              <div class="face top"></div>
+              <div class="face bottom"></div>
+              <div class="board-edge front-top"></div>
+              <div class="board-edge front-bottom"></div>
+              <div class="board-edge front-fore"></div>
+              <div class="board-edge back-top"></div>
+              <div class="board-edge back-bottom"></div>
+              <div class="board-edge back-fore"></div>
+            </div>
+          </div>
+          <div class="rotate-controls">
+            <button
+              id="rotate-left"
+              class="icon-button"
+              aria-label="Rotate book left"
+            >
+              ↶</button
+            ><span>Drag to turn</span
+            ><button
+              id="rotate-right"
+              class="icon-button"
+              aria-label="Rotate book right"
+            >
+              ↷
+            </button>
+          </div>
+          <span class="eyebrow" id="book-format"></span>
+          <h2 id="book-title"></h2>
+          <p class="book-author" id="book-author"></p>
+          <p class="book-description" id="book-description"></p>
+          <div id="book-tags" class="tags"></div>
+          <p class="reading-position" id="reading-position"></p>
+          <button class="primary full" id="read-button">Open book</button
+          ><button class="quiet full" id="edit-button">
+            Edit book details
+          </button>
+          <div class="downloads" id="downloads"></div>
+        </aside>
+      </div>
+      <section id="reader" class="reader" hidden aria-label="PDF reader">
+        <header class="reader-heading">
+          <button id="back-to-library" class="quiet">← Library</button>
+          <h1 id="reader-title"></h1>
+          <span
+            class="saved-state"
+            id="reader-save-status"
+            aria-live="polite"
+          ></span>
+        </header>
+        <div class="reader-controls">
+          <button id="prev-page" class="quiet" aria-label="Previous page">
+            ←</button
+          ><label
+            >Page
+            <input
+              id="page-number"
+              type="number"
+              min="1"
+              value="1"
+              aria-label="PDF page number"
+            />
+            <span id="page-total">of 1</span></label
+          ><button id="next-page" class="quiet" aria-label="Next page">→</button
+          ><span class="control-divider"></span>
+          <div
+            class="view-picker reader-mode"
+            role="group"
+            aria-label="Reading mode"
+          >
+            <button type="button" data-reader-mode="scroll" aria-pressed="true">
+              Scroll</button
+            ><button type="button" data-reader-mode="flip" aria-pressed="false">
+              Page edges
+            </button>
+          </div>
+          <span class="scroll-label" id="reader-mode-hint">Scroll to read</span
+          ><label class="sr-only" for="zoom">PDF zoom</label
+          ><select id="zoom">
+            <option value="fit">Fit width</option>
+            <option value="page">Fit page</option>
+            <option value="0.75">75%</option>
+            <option value="1">100%</option>
+            <option value="1.25">125%</option>
+            <option value="1.5">150%</option>
+            <option value="2">200%</option></select
+          ><button
+            id="rotate-page"
+            class="quiet"
+            aria-label="Rotate PDF page clockwise"
+          >
+            ↻ Rotate</button
+          ><a id="download-pdf" class="quiet" download>Download original</a>
+        </div>
+        <div class="reader-error" id="reader-error" role="alert" hidden></div>
+        <div class="paper-area" id="paper-area"></div>
+      </section>
+      <footer class="footer">
+        <span id="connection-status"
+          ><span class="status-dot"></span>calibre · local library</span
+        ><span>Books have a home. Ideas have room.</span>
+      </footer>
+    </div>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <div id="drop-overlay" class="drop-overlay" hidden>
+      <div>
+        <span>＋</span>
+        <h2>A new place on the shelf.</h2>
+        <p>Drop PDFs and EPUBs to add them to The Den.</p>
+      </div>
+    </div>
+    <dialog id="import-dialog">
+      <form id="import-form">
+        <header>
+          <div>
+            <span class="eyebrow">Grow your library</span>
+            <h2>Add books</h2>
+          </div>
+          <button
+            type="button"
+            data-close
+            class="icon-button"
+            aria-label="Close import"
+          >
+            ×
+          </button>
+        </header>
+        <label class="file-picker"
+          ><span>Choose PDFs or EPUBs</span
+          ><input
+            type="file"
+            id="file-input"
+            accept=".pdf,.epub,application/pdf,application/epub+zip"
+            multiple
+            required
+          /><small
+            >Up to 100 MB each. Files are copied into your calibre
+            library.</small
+          ></label
+        >
+        <div id="import-files" class="import-files"></div>
+        <div class="form-row">
+          <label
+            >Title <span class="optional">optional, one file only</span
+            ><input
+              id="import-title"
+              maxlength="500"
+              placeholder="Read from the book" /></label
+          ><label
+            >Author <span class="optional">optional</span
+            ><input
+              id="import-author"
+              maxlength="500"
+              placeholder="Read from the book"
+          /></label>
+        </div>
+        <label
+          >Categories <span class="optional">optional, separated by commas</span
+          ><input
+            id="import-tags"
+            maxlength="1000"
+            placeholder="e.g. Nature, Research"
+        /></label>
+        <p id="import-status" role="status"></p>
+        <footer>
+          <button type="button" data-close class="quiet">Cancel</button
+          ><button type="submit" class="primary" id="import-submit">
+            Add to library
+          </button>
+        </footer>
+      </form>
+    </dialog>
+    <dialog id="edit-dialog">
+      <form id="edit-form">
+        <header>
+          <div>
+            <span class="eyebrow">In calibre</span>
+            <h2>Book details</h2>
+          </div>
+          <button
+            type="button"
+            data-close
+            class="icon-button"
+            aria-label="Close book details"
+          >
+            ×
+          </button>
+        </header>
+        <label>Title<input id="edit-title" required maxlength="500" /></label
+        ><label>Author<input id="edit-author" maxlength="500" /></label
+        ><label
+          >Categories <span class="optional">separated by commas</span
+          ><input id="edit-tags" maxlength="1000"
+        /></label>
+        <p class="muted">
+          These details are saved to calibre. Its tags become your shelf
+          categories.
+        </p>
+        <p id="edit-status" role="alert"></p>
+        <footer>
+          <button type="button" data-close class="quiet">Cancel</button
+          ><button class="primary" type="submit" id="edit-save">
+            Save details
+          </button>
+        </footer>
+      </form>
+    </dialog>
+    <dialog id="settings-dialog">
+      <header>
+        <div>
+          <span class="eyebrow">Local ownership</span>
+          <h2>Your library</h2>
+        </div>
+        <button
+          data-close
+          class="icon-button"
+          aria-label="Close library settings"
+        >
+          ×
+        </button>
+      </header>
+      <dl>
+        <dt>calibre library</dt>
+        <dd id="library-path"></dd>
+        <dt>Library manager</dt>
+        <dd id="calibre-version"></dd>
+        <dt>PDF reader</dt>
+        <dd id="pdfjs-version"></dd>
+      </dl>
+      <p class="muted">
+        This is The Den’s own collection. Use calibre to organize books and
+        formats; refresh here to see your changes.
+      </p>
+      <button class="primary full" id="open-calibre">
+        Open this library in calibre</button
+      ><a class="quiet full" href="./api/export-reading-state" download
+        >Export reading positions</a
+      >
+      <p class="settings-note">
+        To back up the whole collection, close calibre and The Den, then copy
+        this project’s <code>data</code> folder. Tumbleweed connections are
+        planned for a later stage.
+      </p>
+    </dialog>
+    <dialog id="password-dialog">
+      <form id="password-form">
+        <header>
+          <h2>Password-protected PDF</h2>
+          <button
+            type="button"
+            data-close
+            class="icon-button"
+            aria-label="Cancel password"
+          >
+            ×
+          </button>
+        </header>
+        <p id="password-message">Enter the document password.</p>
+        <label
+          >Password<input
+            id="pdf-password"
+            type="password"
+            autocomplete="off"
+            required
+        /></label>
+        <footer>
+          <button type="button" data-close class="quiet">Cancel</button
+          ><button class="primary" type="submit">Open PDF</button>
+        </footer>
+      </form>
+    </dialog>
+    <dialog
+      id="demo-dialog"
+      class="demo-dialog"
+      aria-labelledby="demo-dialog-title"
+    >
+      <header>
+        <div>
+          <span class="eyebrow">A library to make your own</span>
+          <h2 id="demo-dialog-title">Welcome to The Den.</h2>
+        </div>
+        <button
+          data-close
+          class="icon-button"
+          aria-label="Close about this demo"
+        >
+          ×
+        </button>
+      </header>
+      <p class="demo-intro">
+        A quiet home for your books, with a little of the feeling of holding
+        one.
+      </p>
+      <p class="muted">
+        This sample collection explores the nineteenth century. These are short,
+        original modern essays, with sources inside each book.
+      </p>
+      <ol class="demo-steps">
+        <li>Choose a spine. Drag the book to turn it in your hands.</li>
+        <li>Open it, then choose scrolling or page-edge navigation.</li>
+        <li>
+          Download the app to build your own private, local library with
+          calibre.
+        </li>
+      </ol>
+      <div class="demo-actions">
+        <a
+          class="primary"
+          href="https://github.com/slimtalian/theden#make-it-yours"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Get the app ↗</a
+        ><button id="reset-demo" class="quiet">Reset reading progress</button>
+      </div>
+      <p class="demo-privacy">
+        This demo has no account, uploads, analytics, or connection to anyone's
+        personal library. Reading progress is stored only in this browser.
+        GitHub serves the site.
+      </p>
+    </dialog>
+  </body>
+</html>
