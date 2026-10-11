@@ -1,0 +1,21 @@
+name: Check application and demo
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: sudo apt-get update && sudo apt-get install -y calibre
+      - run: npm test
+      - run: npm run build:demo
+      - run: npm run check:public

@@ -1,0 +1,128 @@
+/* Small finishing details shared by the public demo and the empty local app. */
+.skip-link {
+  position: fixed;
+  left: 20px;
+  top: -80px;
+  z-index: 100;
+  background: #ddd1ac;
+  color: #17201a;
+  padding: 12px 20px;
+  border-radius: 4px;
+}
+.skip-link:focus {
+  top: 16px;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #cbbb8e;
+  outline-offset: 4px;
+}
+.demo-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 0 26px;
+  padding: 17px 0;
+  border-top: 1px solid #bbae7d29;
+  border-bottom: 1px solid #bbae7d29;
+  color: #b9bdad;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.demo-notice p {
+  margin: 0;
+  max-width: 650px;
+}
+.demo-notice strong {
+  color: #d7d7c5;
+  font-weight: 500;
+}
+.demo-notice a {
+  flex: none;
+  color: #c9b98c;
+  text-decoration: none;
+  border-bottom: 1px solid #c9b98c65;
+}
+.demo-library .section-heading h1 {
+  max-width: 740px;
+  font-size: clamp(28px, 3.5vw, 48px);
+  letter-spacing: -0.035em;
+}
+.demo-library .shelf {
+  height: 225px;
+}
+.demo-library .shelf-books {
+  gap: 15px;
+}
+.demo-library .volume {
+  --book-height: 180px;
+}
+.demo-library .sidebar-quote {
+  font-size: 19px;
+}
+.demo-library .book-description {
+  line-height: 1.8;
+}
+.demo-intro {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #c5c7b6;
+}
+.demo-steps {
+  padding-left: 22px;
+  line-height: 1.85;
+  color: #b7bda9;
+}
+.demo-steps li {
+  padding: 4px 0;
+}
+.demo-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 24px 0 14px;
+}
+.demo-actions a {
+  text-decoration: none;
+}
+.demo-privacy {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #a6ae9b;
+  border-top: 1px solid #bbae7d29;
+  padding-top: 17px;
+}
+.demo-dialog code {
+  background: #ffffff08;
+  border: 1px solid #ffffff12;
+  padding: 2px 6px;
+  color: #ded2aa;
+  border-radius: 3px;
+}
+@media (max-width: 680px) {
+  .demo-notice {
+    align-items: flex-start;
+    gap: 10px;
+    flex-direction: column;
+    margin-bottom: 18px;
+    font-size: 12px;
+  }
+  .demo-library .shelf-books {
+    gap: 10px;
+  }
+  .demo-actions {
+    flex-direction: column;
+  }
+  .demo-actions a {
+    text-align: center;
+  }
+  .demo-library .section-heading h1 {
+    font-size: 29px;
+  }
+  .demo-library .section-heading {
+    gap: 10px;
+  }
+}

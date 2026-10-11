@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 122" role="img" aria-labelledby="title description">
+  <title id="title">The Den</title>
+  <desc id="description">Four upright book spines rise toward a serif T, which forms their bookend. The books and wordmark share a single brass baseline.</desc>
+  <g fill="none" stroke="#bdaa7f" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M5 108H175"/>
+    <path d="M14 107V64Q14 62 16 62H34Q36 62 36 64V107M21 73H29"/>
+    <path d="M45 107V53Q45 51 47 51H67Q69 51 69 53V107M52 63H62"/>
+    <path d="M78 107V40Q78 38 80 38H100Q102 38 102 40V107M85 50H95"/>
+    <path d="M111 107V27Q111 25 113 25H133Q135 25 135 27V107M118 37H128"/>
+  </g>
+  <path fill="#bdaa7f" d="M136 16H218L220 40H214C211 28 207 23 193 23H185V89C185 100 188 101 201 102V108H152V102C165 101 168 100 168 89V23H159C145 23 141 28 138 40H132Z"/>
+  <text x="204" y="108" fill="#bdaa7f" font-family="Georgia,'Times New Roman',serif" font-size="101" letter-spacing="-3">he Den</text>
+</svg>

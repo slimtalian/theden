@@ -1,0 +1,16 @@
+node_modules/
+data/
+config.local.json
+.env
+.env.*
+!.env.example
+.npm-cache/
+.test-runs/
+.checks/
+.artifacts/
+dist/
+*.log
+*.tmp
+__pycache__/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,219 @@
+[
+  {
+    "id": 1,
+    "uuid": "demo-steam-and-iron",
+    "title": "Steam & Iron",
+    "authors": "The Den Editions",
+    "tags": ["Invention"],
+    "formats": ["PDF"],
+    "cover": "./demo/covers/steam-and-iron.svg",
+    "file": "./demo/books/steam-and-iron.pdf",
+    "description": "A short journey from the stationary steam engine to the railway workshop. An original modern sample essay about the 1800s.",
+    "series": "The nineteenth century",
+    "added": "2026-01-01",
+    "color": "#52615b",
+    "sections": [
+      {
+        "title": "Power before the railway",
+        "paragraphs": [
+          "A steam engine did not have to travel to change the world. Before locomotives became familiar, stationary engines were already supplying power. Their moving beams and pumps joined the industrial landscape that Britain carried into the nineteenth century. Steam belonged to the workshop and the water system as well as the railway.",
+          "One example is the Boulton & Watt engine built at Crofton in 1812. It raised water for the Kennet and Avon Canal. The canal and the engine worked together: one provided a route for transport, while the other helped keep that route supplied with water.",
+          "This is a useful way to look at invention. A new machine rarely acts alone. It enters a place with existing workers, materials and needs. At Crofton, a steam engine supported an older form of transport. The nineteenth century was full of such overlaps, rather than a single moment when everything became modern."
+        ]
+      },
+      {
+        "title": "An engine on the drawing board",
+        "paragraphs": [
+          "Rocket was built by Robert Stephenson & Co. in 1829 for the Liverpool and Manchester Railway. The familiar locomotive now stands for an era of railway invention, but surviving engineering drawings offer a quieter view of its story: a machine made from many deliberate choices.",
+          "The National Railway Museum holds drawings of Rocket made decades after its construction. Such records remind us to ask when an image was produced and why. A careful drawing may explain an engine without being a direct record of its first day at work. Museums preserve both machines and the changing ways people have understood them.",
+          "Look at a locomotive as a collection of questions. How does heat become movement? How do the wheels carry that movement along the rails? Who makes, checks and repairs the parts? The achievement becomes easier to understand when the famous name gives way to the practical work behind it."
+        ]
+      }
+    ],
+    "sources": [
+      {"title": "Science Museum: Steaming Through the Centuries", "url": "https://blog.sciencemuseum.org.uk/steaming-through-the-centuries/"},
+      {"title": "National Railway Museum: Rocket, Railtrack and a History of Design", "url": "https://blog.railwaymuseum.org.uk/rocket-railtrack-and-a-history-of-design/"}
+    ]
+  },
+  {
+    "id": 2,
+    "uuid": "demo-letters-across-the-ocean",
+    "title": "Letters Across the Ocean",
+    "authors": "The Den Editions",
+    "tags": ["Everyday life"],
+    "formats": ["PDF"],
+    "cover": "./demo/covers/letters-across-the-ocean.svg",
+    "file": "./demo/books/letters-across-the-ocean.pdf",
+    "description": "Postage, migration, and the ordinary words that connected distant lives. An original modern sample essay about the 1800s.",
+    "series": "The nineteenth century",
+    "added": "2026-01-01",
+    "color": "#a1785a",
+    "sections": [
+      {
+        "title": "The price of a message",
+        "paragraphs": [
+          "A letter seems simple: paper, an address and a few words. In nineteenth-century Britain, however, the cost of sending one helped decide who could stay in touch. Before postal reform, charges varied with distance and the number of sheets. Recipients often had to pay, and some letters were refused.",
+          "Rowland Hill proposed a different arrangement in 1837. A standard-weight domestic letter would cost one penny, paid in advance. The reforms took effect in 1840, with the adhesive postage stamp providing a small, visible proof of payment. The domestic penny rate should not be mistaken for a universal price for overseas mail.",
+          "The change made routine correspondence more accessible. It also shows that an invention can be a rule rather than a machine. Simpler prices and advance payment helped a familiar service reach more people. The stamp was only a small piece of paper, but it represented a larger change in how communication was organised."
+        ]
+      },
+      {
+        "title": "An address in a new country",
+        "paragraphs": [
+          "During the later 1800s, people reached the United States from many parts of the world. Some sought work or land; others left famine, persecution or difficult conditions at home. Their journeys did not all follow the same route, and the opportunities they found were often unequal.",
+          "The Library of Congress describes both the energy newcomers brought and the discrimination they faced. Many settled near people from their former homelands. A familiar language or an existing community could matter as much as a promising destination on a map.",
+          "Imagine the questions a letter between separated relatives might contain: Is there work? Is the rent manageable? Who is well, and who needs help? These are illustrative questions, not quotations from an archive. They offer one way to think about migration at a human scale. Behind the totals were particular relationships, practical decisions and people trying to make sense of life at a distance."
+        ]
+      }
+    ],
+    "sources": [
+      {"title": "Smithsonian National Postal Museum: Postal Reforms that Transformed the Mail", "url": "https://postalmuseum.si.edu/exhibition/the-queen%E2%80%99s-own/postal-reforms-that-transformed-the-mail"},
+      {"title": "Library of Congress: Immigration to the United States, 1851 to 1900", "url": "https://www.loc.gov/classroom-materials/united-states-history-primary-source-timeline/rise-of-industrial-america-1876-1900/immigration-to-united-states-1851-1900/"}
+    ]
+  },
+  {
+    "id": 3,
+    "uuid": "demo-light-on-silver",
+    "title": "Light on Silver",
+    "authors": "The Den Editions",
+    "tags": ["Invention"],
+    "formats": ["PDF"],
+    "cover": "./demo/covers/light-on-silver.svg",
+    "file": "./demo/books/light-on-silver.pdf",
+    "description": "Two early photographic processes and a new way of keeping an image. An original modern sample essay about the 1800s.",
+    "series": "The nineteenth century",
+    "added": "2026-01-01",
+    "color": "#657075",
+    "sections": [
+      {
+        "title": "One image on a metal plate",
+        "paragraphs": [
+          "In 1839, Louis Daguerre publicly introduced a photographic process that produced remarkably detailed pictures. A daguerreotype was an image on a polished, silver-plated copper sheet. Each plate was a unique object, rather than one print from a reusable negative.",
+          "Daguerre's work grew from years of experiment, including a partnership with Nicephore Niepce. The process did not appear fully formed in a single inspired moment. Its public announcement followed a long effort to make light leave a stable image. Still objects suited the long exposures required by early photography.",
+          "A photograph could serve more than one purpose. Daguerre used the medium for carefully arranged artistic subjects and for scientific observation. That combination remains familiar: a picture can be beautiful, useful, or both. The early metal plate invites a close look at the meeting of craft, chemistry and observation, before photographs became everyday items that could be copied and shared with ease."
+        ]
+      },
+      {
+        "title": "A picture that could be printed",
+        "paragraphs": [
+          "William Henry Fox Talbot offered a different approach. His calotype process, announced in 1841, used chemically treated paper to make a negative. That negative could produce several positive prints. The important change was not simply the surface of the picture, but the relationship between an image and its copies.",
+          "Paper negatives had their own character. Their fibres softened detail, giving pictures a different appearance from the precision of a daguerreotype. Some photographers continued to value paper even after glass negatives became available. Artistic preference and practical needs did not always point toward the same material.",
+          "There was therefore no single early photographic look. A picture of a tree, a building or a person reflected the chosen process as well as the subject. When looking at a nineteenth-century photograph, it helps to ask how it was made. Its texture and limits are part of the image, not merely defects beside it."
+        ]
+      }
+    ],
+    "sources": [
+      {"title": "The Metropolitan Museum of Art: Daguerre and the Invention of Photography", "url": "https://www.metmuseum.org/essays/daguerre-1787-1851-and-the-invention-of-photography"},
+      {"title": "The Metropolitan Museum of Art: Impressed by Light", "url": "https://www.metmuseum.org/exhibitions/listings/2007/impressed-by-light"}
+    ]
+  },
+  {
+    "id": 4,
+    "uuid": "demo-the-victorian-garden",
+    "title": "The Victorian Garden",
+    "authors": "The Den Editions",
+    "tags": ["Everyday life"],
+    "formats": ["PDF"],
+    "cover": "./demo/covers/the-victorian-garden.svg",
+    "file": "./demo/books/the-victorian-garden.pdf",
+    "description": "Patterned flowerbeds, travelling plants, and the work behind a garden. An original modern sample essay about the 1800s.",
+    "series": "The nineteenth century",
+    "added": "2026-01-01",
+    "color": "#4f6959",
+    "sections": [
+      {
+        "title": "Colour arranged on the ground",
+        "paragraphs": [
+          "A Victorian parterre was a garden designed as a pattern. Enclosed beds, gravel paths and carefully chosen plants formed a composition that could often be appreciated best from an upstairs window. The style had older roots, but enjoyed renewed popularity in nineteenth-century England.",
+          "Large quantities of bedding plants supplied bright seasonal colour. Pelargoniums, petunias, salvias and other flowers could be arranged in precise designs. The result depended on repeated labour: plants had to be raised, positioned, watered and replaced. A finished garden could conceal the many hands needed to maintain it.",
+          "These formal displays represented one kind of Victorian gardening, not the experience of every household. They belonged to particular settings, resources and tastes. Looking at the pattern is a good beginning; looking for the work behind it adds another layer. A garden can be both a place to enjoy and a record of how people used land, time and skill."
+        ]
+      },
+      {
+        "title": "A small world behind glass",
+        "paragraphs": [
+          "Moving living plants across an ocean was difficult. Salt water, limited fresh water and a long voyage could kill a specimen before it reached its destination. The Wardian case offered a useful answer: a glazed container in which moisture could circulate while light reached the plants.",
+          "Nathaniel Bagshaw Ward developed the idea after observing a plant growing in a closed glass container. In 1833, cases carrying ferns, mosses and grasses travelled successfully from London to Sydney. The small travelling environment helped plants survive journeys that had previously been far more uncertain.",
+          "Kew used these cases to receive living specimens from abroad. The invention connected gardens with long-distance trade and plant collecting. Its simple appearance can hide the scale of that change. A glass box protected a few stems and leaves, while the routes it travelled linked people and places far beyond the garden where a visitor would eventually see them."
+        ]
+      }
+    ],
+    "sources": [
+      {"title": "English Heritage: Perfect Parterres", "url": "https://www.english-heritage.org.uk/learn/histories/perfect-parterres/"},
+      {"title": "Royal Botanic Gardens, Kew: The Wardian Case", "url": "https://www.kew.org/read-and-watch/how-wardian-case-changed-botanical-world"}
+    ]
+  },
+  {
+    "id": 5,
+    "uuid": "demo-the-city-after-dark",
+    "title": "The City After Dark",
+    "authors": "The Den Editions",
+    "tags": ["Everyday life"],
+    "formats": ["PDF"],
+    "cover": "./demo/covers/the-city-after-dark.svg",
+    "file": "./demo/books/the-city-after-dark.pdf",
+    "description": "Gas lamps, early electricity, and the people who kept London lit. An original modern sample essay about the 1800s.",
+    "series": "The nineteenth century",
+    "added": "2026-01-01",
+    "color": "#3f525b",
+    "sections": [
+      {
+        "title": "A lamp and a network",
+        "paragraphs": [
+          "London's gas lighting began with a public demonstration in Pall Mall in 1807. Over the following decades, gas lamps spread along major streets. Compared with earlier oil lighting, they made the city brighter and easier to move through after sunset.",
+          "A lamp was only the visible end of a much larger system. Gasworks processed coal, pipes carried gas, and workers maintained the supply. Lamplighters tended the lamps. The glow outside a shop or theatre depended on practical work elsewhere in the city, often out of sight of the people enjoying it.",
+          "The benefits also came with costs. Gasworks produced smoke and pollution, while leaks and explosions created danger. The history of a brighter street therefore includes more than pleasant evening walks. It includes the workers and nearby residents who lived with the system that made those walks possible. A familiar street fixture can reveal an entire industrial network when we follow its connections."
+        ]
+      },
+      {
+        "title": "Electric light arrives unevenly",
+        "paragraphs": [
+          "Electric light entered London gradually. In 1879, the British Museum installed electric lamps in its Reading Room for use on foggy days. The Royal Albert Dock used electric lighting on its quayside from 1880, helping work continue after dark. These were specific places with specific needs, not an instantly electrified city.",
+          "Successful lightbulbs associated with Thomas Edison and Joseph Swan appeared around 1880. Yet a useful lamp was only part of the task. Buildings and streets also needed a supply of power and the means to carry it. Older and newer kinds of lighting continued alongside each other.",
+          "For most London homes, the larger move toward electricity came in the twentieth century. That later change helps us read the 1800s accurately. An invention's arrival is different from its ordinary availability. At the century's close, electric light could still signal a striking modern addition while gas remained part of familiar daily life."
+        ]
+      }
+    ],
+    "sources": [
+      {"title": "London Museum: How Gas Lamps Illuminated London", "url": "https://www.londonmuseum.org.uk/collections/london-stories/gas-lamps-illuminated-london/"},
+      {"title": "London Museum: When Did London Get Electricity?", "url": "https://www.londonmuseum.org.uk/collections/london-stories/when-did-london-get-electricity/"}
+    ]
+  },
+  {
+    "id": 6,
+    "uuid": "demo-votes-and-voices",
+    "title": "Votes and Voices",
+    "authors": "The Den Editions",
+    "tags": ["Social change"],
+    "formats": ["PDF"],
+    "cover": "./demo/covers/votes-and-voices.svg",
+    "file": "./demo/books/votes-and-voices.pdf",
+    "description": "Meetings, petitions, and the nineteenth-century campaign for women's rights in the United States. An original modern sample essay.",
+    "series": "The nineteenth century",
+    "added": "2026-01-01",
+    "color": "#78535b",
+    "sections": [
+      {
+        "title": "A meeting in Seneca Falls",
+        "paragraphs": [
+          "In July 1848, a women's rights convention met in Seneca Falls, New York. Its Declaration of Sentiments challenged the unequal position of women and called for changes in civil, social, religious and political life. The demand for voting rights was one part of a broader argument about participation and independence.",
+          "The meeting drew on work that had already begun. Several organisers had experience in the movement against slavery. Speaking, writing, raising funds and arranging meetings had helped them develop practical skills for public action. Frederick Douglass attended the convention and supported the demand for women's suffrage.",
+          "A convention did not itself change the law. It gave people a place to state demands, debate them and make a public record. That distinction matters: a declaration marks an intention, while a campaign must find ways to act on it. The meeting became an important reference point for later organisers, rather than a complete achievement in itself."
+        ]
+      },
+      {
+        "title": "The work between milestones",
+        "paragraphs": [
+          "The nineteenth-century suffrage movement developed through years of organising. Newspapers carried reports and arguments. Associations formed, held conventions and sought support. These ordinary activities kept a demand visible between the events that later appeared in history books.",
+          "There was no single, uninterrupted path. The Library of Congress describes disagreements among national leaders and competing approaches to local, state and national campaigns. Rival organisations eventually joined in the National American Woman Suffrage Association in 1890. Agreement on a broad aim did not mean agreement on every strategy.",
+          "The struggle also extended beyond the end of the 1800s. It is useful to pause before the later milestones and notice the work already under way: preparing a speech, collecting a signature, publishing a report, or persuading someone to attend. Such actions did not guarantee success. They show how public movements were sustained by repeated efforts, as well as by famous names and memorable dates."
+        ]
+      }
+    ],
+    "sources": [
+      {"title": "National Park Service: Women's Rights National Historical Park", "url": "https://www.nps.gov/places/crwomensrights.htm"},
+      {"title": "Library of Congress: Seneca Falls and Building a Movement, 1776-1890", "url": "https://www.loc.gov/exhibitions/women-fight-for-the-vote/about-this-exhibition/seneca-falls-and-building-a-movement-1776-1890/"},
+      {"title": "Library of Congress: Women's Suffrage", "url": "https://www.loc.gov/classroom-materials/elections/voters/women-suffrage/"}
+    ]
+  }
+]

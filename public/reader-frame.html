@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>The Den · PDF reader</title>
+    <link rel="stylesheet" href="./vendor/pdfjs/web/pdf_viewer.css" />
+    <link rel="stylesheet" href="./reader-frame.css" />
+    <script type="module" src="./reader-frame.js"></script>
+  </head>
+  <body>
+    <div
+      id="viewerContainer"
+      tabindex="0"
+      role="region"
+      aria-label="PDF pages — scroll to read"
+    >
+      <div id="viewer" class="pdfViewer"></div>
+    </div>
+    <nav id="page-edges" aria-label="Page edge navigation" hidden>
+      <button
+        id="edge-previous"
+        class="page-edge previous"
+        type="button"
+        aria-label="Previous page at left edge"
+        title="Previous page"
+      >
+        <span aria-hidden="true">‹</span>
+      </button>
+      <button
+        id="edge-next"
+        class="page-edge next"
+        type="button"
+        aria-label="Next page at right edge"
+        title="Next page"
+      >
+        <span aria-hidden="true">›</span>
+      </button>
+    </nav>
+  </body>
+</html>

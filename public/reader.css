@@ -1,0 +1,200 @@
+body.reading {
+  overflow: hidden;
+}
+.reading > .app {
+  min-height: 0;
+  height: 100dvh;
+}
+.reading .header,
+.reading .footer {
+  display: none;
+}
+.reader {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+}
+.reader-heading {
+  padding: 14px 24px 8px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.reader-heading h1 {
+  font-size: 21px;
+  margin: 0;
+}
+.reader-controls {
+  padding: 8px 20px 12px;
+  gap: 9px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.scroll-label {
+  color: var(--muted);
+  font-size: 11px;
+  margin-right: 8px;
+}
+.reader-mode {
+  flex-shrink: 0;
+}
+.reader-mode button {
+  min-height: 32px;
+}
+.reader-mode [aria-pressed="true"] {
+  color: var(--brass);
+}
+.paper-area {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+#pdf-frame {
+  display: block;
+  width: min(100%, 1100px);
+  height: 100%;
+  margin: 0 auto;
+  border: 0;
+  background: #121914;
+}
+.reader-error {
+  flex-shrink: 0;
+  margin: 8px 20px;
+  font-size: 12px;
+}
+@media (max-width: 650px) {
+  .reader-heading {
+    padding: 8px 10px 0;
+    flex-wrap: wrap;
+    gap: 5px 10px;
+  }
+  .reader-heading h1 {
+    order: 3;
+    flex-basis: 100%;
+    font-size: 18px;
+    padding: 4px 10px;
+  }
+  .reader-heading .saved-state {
+    font-size: 10px;
+    margin-left: auto;
+  }
+  .reader-controls {
+    justify-content: center;
+    gap: 2px 5px;
+    padding: 4px 8px 8px;
+  }
+  .reader-controls .quiet {
+    padding: 6px 8px;
+    min-height: 38px;
+  }
+  .reader-controls input {
+    width: 52px;
+    font-size: 16px;
+  }
+  .scroll-label {
+    display: none;
+  }
+}
+@media (pointer: coarse) {
+  .reader-mode button {
+    min-height: 44px;
+  }
+}
+
+/* A rolling library ladder marks the move between the shelves and the reader. */
+body.changing-room {
+  overflow: hidden;
+}
+.reader.reader-transition-layer {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  z-index: 70;
+  background: var(--bg, #171f18);
+}
+#library-ladder {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 80;
+}
+.ladder-traveller {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: clamp(128px, 15vw, 186px);
+  transform: translateX(-400px);
+}
+.ladder-body {
+  position: absolute;
+  inset: -6vh 0 0;
+  transform: skewX(-5deg);
+  filter: drop-shadow(10px 3px 10px #0006);
+}
+.ladder-body::before,
+.ladder-body::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 25px;
+  width: 14px;
+  border: 1px solid #a38a58;
+  border-radius: 5px;
+  background: linear-gradient(
+    90deg,
+    #443b28,
+    #c1a573 30%,
+    #897046 55%,
+    #4e402b
+  );
+  box-shadow:
+    inset 1px 0 #e1c79577,
+    2px 0 4px #0004;
+}
+.ladder-body::before {
+  left: 18%;
+}
+.ladder-body::after {
+  right: 18%;
+}
+.ladder-rungs {
+  position: absolute;
+  inset: 0 20% 38px;
+  --step: clamp(58px, 10vh, 88px);
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0 calc(var(--step) - 12px),
+    #cfb17b calc(var(--step) - 12px) calc(var(--step) - 10px),
+    #8e754a calc(var(--step) - 10px) calc(var(--step) - 4px),
+    #463a26 calc(var(--step) - 4px) var(--step)
+  );
+}
+.ladder-wheel {
+  position: absolute;
+  bottom: 7px;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #bbaa7e 0 3px,
+    #484735 4px 8px,
+    #171d18 9px
+  );
+  border: 1px solid #9d8b60;
+}
+.ladder-wheel.left {
+  left: calc(18% - 4px);
+}
+.ladder-wheel.right {
+  right: calc(18% - 4px);
+}

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 595" role="img" aria-labelledby="title desc">
+<title id="title">Steam &amp; Iron</title>
+<desc id="desc">Original demo cover. The Den Editions. A modern sample essay about the nineteenth century.</desc>
+<rect width="420" height="595" fill="#52615b"/>
+<path d="M0 0H15V595H0Z" fill="#000" opacity=".16"/>
+<path d="M20 0V595" stroke="#d8bb80" opacity=".3"/>
+<rect x="35" y="30" width="355" height="533" rx="1" fill="none" stroke="#d8bb80" stroke-opacity=".55"/>
+<path d="M47 74H378 M47 500H378" stroke="#d8bb80" stroke-opacity=".55"/>
+<g fill="#f5efdf" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif">
+<text x="218" y="59" font-family="Arial, sans-serif" font-size="9" letter-spacing="3">THE NINETEENTH CENTURY</text>
+<text x="218" y="162" font-size="39">Steam</text>
+<text x="218" y="208" font-size="39">&amp; Iron</text>
+<text x="218" y="414" font-family="Arial, sans-serif" font-size="9" letter-spacing="2">INVENTION</text>
+<text x="218" y="451" font-size="18">The Den Editions</text>
+<text x="218" y="528" font-family="Arial, sans-serif" font-size="9" letter-spacing="2">ORIGINAL SAMPLE ESSAY</text>
+</g>
+<g transform="translate(158, 261)" fill="none" stroke="#d8bb80" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="60" cy="60" r="35"/>
+<circle cx="60" cy="60" r="8"/>
+<line x1="69.0" y1="60.0" x2="95.0" y2="60.0"/>
+<line x1="102.0" y1="60.0" x2="109.0" y2="60.0"/>
+<line x1="66.36396103067892" y1="66.36396103067892" x2="84.74873734152916" y2="84.74873734152916"/>
+<line x1="89.698484809835" y1="89.698484809835" x2="94.64823227814082" y2="94.64823227814082"/>
+<line x1="60.0" y1="69.0" x2="60.0" y2="95.0"/>
+<line x1="60.0" y1="102.0" x2="60.0" y2="109.0"/>
+<line x1="53.63603896932107" y1="66.36396103067892" x2="35.251262658470836" y2="84.74873734152916"/>
+<line x1="30.301515190165006" y1="89.698484809835" x2="25.351767721859176" y2="94.64823227814082"/>
+<line x1="51.0" y1="60.0" x2="25.0" y2="60.00000000000001"/>
+<line x1="18.0" y1="60.00000000000001" x2="11.0" y2="60.00000000000001"/>
+<line x1="53.63603896932107" y1="53.63603896932107" x2="35.251262658470836" y2="35.251262658470836"/>
+<line x1="30.301515190165" y1="30.301515190165006" x2="25.35176772185916" y2="25.351767721859176"/>
+<line x1="60.0" y1="51.0" x2="59.99999999999999" y2="25.0"/>
+<line x1="59.99999999999999" y1="18.0" x2="59.99999999999999" y2="11.0"/>
+<line x1="66.36396103067892" y1="53.63603896932107" x2="84.74873734152916" y2="35.251262658470836"/>
+<line x1="89.69848480983498" y1="30.301515190165" x2="94.64823227814082" y2="25.35176772185916"/></g>
+<circle cx="218" cy="477" r="2" fill="#d8bb80"/>
+</svg>
