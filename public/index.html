@@ -24,6 +24,7 @@
     <div class="workspace" id="workspace">
       <main id="library-main" tabindex="-1">
         <h1 class="sr-only">Your library</h1>
+        <div class="category-rail" id="category-rail" hidden><button class="rail-arrow" id="categories-previous" aria-label="Previous categories" disabled>‹</button><nav id="categories" aria-label="Browse categories"></nav><button class="rail-arrow" id="categories-next" aria-label="More categories">›</button></div>
         <div class="filter-status" id="filter-status" hidden><span id="result-line" aria-live="polite"></span><button id="clear-filters" class="quiet" aria-label="Clear filters">Clear ×</button></div>
         <div id="empty-state" class="empty-state" hidden><h2>Your shelves await.</h2><button class="primary" id="first-book">Add books</button><p>or drop a PDF or EPUB here</p></div>
         <div id="no-results" class="no-results" hidden><h2>No books found.</h2></div>
@@ -40,29 +41,7 @@
             aria-label="Drag horizontally to turn the book"
           >
             <div class="book-shadow"></div>
-            <div class="book-object" id="book-object" aria-hidden="true">
-              <div class="face front">
-                <span class="cover-label">THE DEN</span
-                ><span class="cover-title" id="cover-title"></span
-                ><span class="cover-ornament">❧</span
-                ><span class="cover-author" id="cover-author"></span>
-              </div>
-              <div class="face back">
-                <span class="cover-label">FROM YOUR LIBRARY</span
-                ><span id="back-title"></span><span id="back-author"></span
-                ><span class="back-mark">d.</span>
-              </div>
-              <div class="face spine"><span id="object-spine"></span></div>
-              <div class="face pages"></div>
-              <div class="face top"></div>
-              <div class="face bottom"></div>
-              <div class="board-edge front-top"></div>
-              <div class="board-edge front-bottom"></div>
-              <div class="board-edge front-fore"></div>
-              <div class="board-edge back-top"></div>
-              <div class="board-edge back-bottom"></div>
-              <div class="board-edge back-fore"></div>
-            </div>
+            <div class="book-object" id="book-object" aria-hidden="true"></div>
           </div>
           <div class="rotate-controls">
             <button
@@ -84,7 +63,7 @@
       </div><div class="book-info">
         <span class="eyebrow" id="book-format"></span><h2 id="book-title"></h2><p class="book-author" id="book-author"></p>
         <p class="reading-position" id="reading-position"></p><button class="primary" id="read-button">Read</button>
-        <details class="book-details" id="book-details"><summary>Details</summary><p class="book-description" id="book-description"></p><div id="book-tags" class="tags"></div><button class="quiet" id="edit-button">Edit details</button><div class="downloads" id="downloads"></div></details>
+        <details class="book-details" id="book-details"><summary>Details</summary><label class="option-row jacket-option">Cloth jacket<input type="checkbox" id="cloth-jacket" /></label><p class="book-description" id="book-description"></p><div id="book-tags" class="tags"></div><button class="quiet" id="edit-button">Edit details</button><div class="downloads" id="downloads"></div></details>
       </div></div>
     </section>
       <section id="reader" class="reader" hidden aria-label="PDF reader">
@@ -243,7 +222,6 @@
 
   <dialog id="settings-dialog" class="library-drawer" aria-labelledby="library-options-title">
     <header><div><h2 id="library-options-title">Library</h2><span id="book-count" class="count"></span></div><button data-close class="icon-button" aria-label="Close library options">×</button></header>
-    <section class="drawer-section"><h3>Categories</h3><nav id="categories" aria-label="Categories"></nav></section>
     <section class="drawer-section"><label class="option-row" for="sort">Sort<select id="sort"><option value="title">Title A–Z</option><option value="author">Author A–Z</option><option value="newest">Newest first</option></select></label><label class="option-row motion" for="motion">Gentle motion<input type="checkbox" id="motion" checked /></label><button class="quiet" id="refresh-button">↻ Refresh</button></section>
     <details class="drawer-section" id="local-settings"><summary>Manage library</summary><button class="primary full" id="open-calibre">Open in calibre</button><a class="quiet full" href="./api/export-reading-state" download>Export reading positions</a><dl><dt>Library folder</dt><dd id="library-path"></dd><dt>calibre</dt><dd id="calibre-version"></dd><dt>PDF.js</dt><dd id="pdfjs-version"></dd></dl><p class="settings-note">Backup: close The Den and calibre, then copy the data folder.</p></details>
     <details class="drawer-section" id="demo-settings" hidden><summary>About this demo</summary><p class="muted">Six original essays about the 1800s. Reading progress stays in this browser.</p><a class="quiet" href="https://github.com/slimtalian/theden#make-it-yours" target="_blank" rel="noopener noreferrer">Get The Den ↗</a><button id="reset-demo" class="quiet">Reset reading progress</button></details>

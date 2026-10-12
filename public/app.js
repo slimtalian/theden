@@ -6,6 +6,7 @@ import {
 } from "./library-client.js";
 import { createReaderTransition } from "./reader-transition.js";
 import { setupReader } from "./reader.js";
+import { bookDesign, makeBookObject, makeCatalogueCover } from "./book-design.js";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
 const escapeHTML = (v) =>
@@ -16,15 +17,12 @@ const escapeHTML = (v) =>
         c
       ],
   );
-const colors = [
-  "#465c49",
-  "#675a3f",
-  "#6c4c3d",
-  "#3f5959",
-  "#615c42",
-  "#674849",
-  "#3f4d60",
-];
+let jackets = new Set();
+try {
+  const saved = JSON.parse(localStorage.getItem("the-den-jackets") || "[]");
+  if (Array.isArray(saved)) jackets = new Set(saved.filter(value => typeof value === "string"));
+} catch {}
+const usesJacket = book => jackets.has(String(book.uuid || book.id));
 let loaded = false,
   status,
   books = [],
@@ -61,9 +59,7 @@ async function api(route, options) {
   return libraryRequest(route, options, status?.token);
 }
 
-const seed = (b) =>
-  [...b.uuid].reduce((n, c) => (n * 31 + c.charCodeAt(0)) >>> 0, 7);
-const color = (b) => b.color || colors[seed(b) % colors.length];
+const seed = (b) => bookDesign(b).seed;
 function filtered() {
   const q = query.trim().toLowerCase();
   return books
@@ -87,6 +83,7 @@ function filtered() {
     );
 }
 function renderCategories() {
+  const previousScroll = $("#categories").scrollLeft;
   const counts = new Map();
   for (const book of books)
     for (const tag of book.tags) counts.set(tag, (counts.get(tag) || 0) + 1);
@@ -100,14 +97,26 @@ function renderCategories() {
   $("#categories").innerHTML = items
     .map(
       ([name, count]) =>
-        `<button type="button" data-category="${escapeHTML(name)}" aria-pressed="${name === category}"><span>${escapeHTML(name)}</span><span>${count}</span></button>`,
+        `<button type="button" data-category="${escapeHTML(name)}" aria-pressed="${name === category}" aria-label="${escapeHTML(name)}, ${count} ${count === 1 ? "book" : "books"}"><span>${escapeHTML(name)}</span><span class="category-count" aria-hidden="true">${count}</span></button>`,
     )
     .join("");
+  $("#categories").scrollLeft = previousScroll;
+  $("#category-rail").hidden = !books.length;
+  requestAnimationFrame(updateCategoryRail);
+}
+function updateCategoryRail() {
+  const rail = $("#categories");
+  const overflow = rail.scrollWidth > rail.clientWidth + 2;
+  $("#category-rail").classList.toggle("has-overflow", overflow);
+  $("#categories-previous").disabled = rail.scrollLeft < 2;
+  $("#categories-next").disabled = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 2;
 }
 let lastColumns = 0;
 function shelfColumns() {
   const width = $("#shelves").clientWidth;
-  return Math.max(1, Math.min(isDemo ? (width < 700 ? 3 : 6) : 12, Math.floor((width - 40) / 72)));
+  const capacity = Math.max(1, Math.min(16, Math.floor((width - 54) / 59)));
+  const count = filtered().length;
+  return count ? Math.ceil(count / Math.ceil(count / capacity)) : capacity;
 }
 function renderBooks() {
   if (!loaded) return;
@@ -137,8 +146,7 @@ function renderBooks() {
     const row = document.createElement("div");
     row.className = "shelf-books";
     for (const book of list.slice(r * columns, (r + 1) * columns)) {
-      const n = seed(book),
-        button = document.createElement("button");
+      const design = bookDesign(book), button = document.createElement("button");
       button.className = "volume" + (query ? " matched" : "");
       button.dataset.book = book.id;
       button.type = "button";
@@ -148,24 +156,25 @@ function renderBooks() {
       );
       button.setAttribute("aria-pressed", String(book.id === selected?.id));
       button.title = `${book.title} — ${book.authors}`;
-      button.style.setProperty("--book-color", color(book));
-      button.style.setProperty(
-        "--book-height",
-        `${190 + (n % 27)}px`,
-      );
-      button.style.setProperty("--book-width", `${42 + (n % 13)}px`);
-      button.innerHTML = `<span class="binding"><span class="spine-title">${escapeHTML(book.title)}</span><span class="spine-format">${escapeHTML(book.formats[0] || "BOOK")}</span></span>${book.progress ? '<span class="ribbon" aria-hidden="true"></span>' : ""}`;
+      button.style.setProperty("--volume-height", `${design.height}px`);
+      button.style.setProperty("--volume-width", `${design.depth + 8}px`);
+      button.append(makeBookObject(book, {jacket:usesJacket(book)}));
+      if (book.progress) button.insertAdjacentHTML("beforeend", '<span class="ribbon" aria-hidden="true"></span>');
       row.append(button);
     }
     shelf.append(row);
     $("#shelves").append(shelf);
   }
-  $("#catalogue").innerHTML = list
-    .map(
-      (book) =>
-        `<button type="button" class="catalogue-item" data-book="${book.id}" aria-pressed="${selected?.id === book.id}">${book.cover ? `<img class="catalogue-cover" src="${book.cover}" alt="" loading="lazy">` : `<span class="catalogue-cover" style="--book-color:${color(book)}"></span>`}<span><span class="catalogue-title">${escapeHTML(book.title)}</span><span class="catalogue-author">${escapeHTML(book.authors)}${book.tags.length ? " · " + escapeHTML(book.tags.join(", ")) : ""}</span></span><span class="catalogue-format">${escapeHTML(book.formats.join(" · "))}</span></button>`,
-    )
-    .join("");
+  $("#catalogue").replaceChildren(...list.map(book => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "catalogue-item";
+    button.dataset.book = book.id;
+    button.setAttribute("aria-pressed", String(selected?.id === book.id));
+    button.innerHTML = `<span><span class="catalogue-title">${escapeHTML(book.title)}</span><span class="catalogue-author">${escapeHTML(book.authors)}${book.tags.length ? " · " + escapeHTML(book.tags.join(", ")) : ""}</span></span><span class="catalogue-format">${escapeHTML(book.formats.join(" · "))}</span>`;
+    button.prepend(makeCatalogueCover(book, {jacket:usesJacket(book)}));
+    return button;
+  }));
 }
 async function refresh() {
   const result = await api("/api/books?refresh=1");
@@ -189,11 +198,6 @@ function showBook(book, redraw = true) {
   selected = book;
   $("#workspace").classList.add("has-selection");
   $("#inspector").hidden = false;
-  $("#cover-title").textContent = book.title;
-  $("#cover-author").textContent = book.authors;
-  $("#back-title").textContent = book.title;
-  $("#back-author").textContent = book.authors;
-  $("#object-spine").textContent = book.title;
   $("#book-title").textContent = book.title;
   $("#book-author").textContent = book.authors;
   $("#book-description").textContent = book.description;
@@ -219,26 +223,11 @@ function showBook(book, redraw = true) {
         `<a href="${escapeHTML(bookFileURL(book, fmt, true))}" download>Download ${escapeHTML(fmt)}</a>`,
     )
     .join("");
-  $("#book-object").style.setProperty("--cover", color(book));
-  $("#book-object").style.setProperty("--depth", `${24 + (seed(book) % 9)}px`);
-  $("#book-object").style.setProperty("--book-width", "160px");
-  const front = $(".book-object .front");
-  front.classList.remove("with-cover");
-  front.style.removeProperty("--cover-art");
-  if (book.cover) {
-    const image = new Image();
-    image.onload = () => {
-      if (selected?.id === book.id) {
-        $("#book-object").style.setProperty(
-          "--book-width",
-          `${Math.round(224 * Math.max(0.58, Math.min(0.88, image.naturalWidth / image.naturalHeight)))}px`,
-        );
-        front.style.setProperty("--cover-art", `url("${book.cover}")`);
-        front.classList.add("with-cover");
-      }
-    };
-    image.src = book.cover;
-  }
+  const object = makeBookObject(book, {jacket:usesJacket(book)});
+  object.id = "book-object";
+  $("#book-object").replaceWith(object);
+  $("#cloth-jacket").checked = !book.cover || usesJacket(book);
+  $("#cloth-jacket").disabled = !book.cover;
   targetY = Math.round(angleY / 360) * 360 - 26;
   targetX = -8;
   animateBook();
@@ -388,10 +377,36 @@ $("#categories").addEventListener("click", (e) => {
   const button = e.target.closest("[data-category]");
   if (button) {
     category = button.dataset.category;
-    renderCategories();
+    $$("[data-category]").forEach(item => item.setAttribute("aria-pressed", String(item.dataset.category === category)));
     renderBooks();
-    $("#settings-dialog").close();
+    button.scrollIntoView({block:"nearest",inline:"nearest",behavior:motion ? "smooth" : "instant"});
+    if (motion) (view === "shelves" ? $("#shelves") : $("#catalogue")).animate([{opacity:.25,transform:"translateY(8px)"},{opacity:1,transform:"none"}], {duration:280,easing:"ease-out"});
   }
+});
+$("#categories").addEventListener("scroll", updateCategoryRail, {passive:true});
+$("#categories").addEventListener("keydown", event => {
+  const items = $$("#categories button");
+  let index = items.indexOf(document.activeElement);
+  if (index < 0) return;
+  if (event.key === "ArrowRight") index = Math.min(items.length - 1, index + 1);
+  else if (event.key === "ArrowLeft") index = Math.max(0, index - 1);
+  else if (event.key === "Home") index = 0;
+  else if (event.key === "End") index = items.length - 1;
+  else return;
+  event.preventDefault();
+  items[index].focus({preventScroll:true});
+  items[index].scrollIntoView({block:"nearest",inline:"nearest",behavior:motion ? "smooth" : "instant"});
+});
+for (const [id, direction] of [["categories-previous", -1], ["categories-next", 1]]) {
+  $(`#${id}`).addEventListener("click", () => $("#categories").scrollBy({left:direction * $("#categories").clientWidth * .7,behavior:motion ? "smooth" : "instant"}));
+}
+new ResizeObserver(updateCategoryRail).observe($("#categories"));
+$("#cloth-jacket").addEventListener("change", event => {
+  if (!selected) return;
+  const key = String(selected.uuid || selected.id);
+  event.target.checked ? jackets.add(key) : jackets.delete(key);
+  try { localStorage.setItem("the-den-jackets", JSON.stringify([...jackets])); } catch {}
+  showBook(selected);
 });
 $$("[data-view]").forEach((button) =>
   button.addEventListener("click", () => {
