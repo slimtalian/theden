@@ -1,13 +1,15 @@
-// Keep both real views mounted while the ladder reveals or covers the reader.
+// Keep both real views mounted while the ladder reveals a book or its reader.
 // This also works in browsers without the View Transition API.
 export function createReaderTransition(reader) {
-  const overlay = document.createElement("div");
+  const overlay = document.getElementById("library-ladder") || document.createElement("div");
   overlay.id = "library-ladder";
   overlay.hidden = true;
   overlay.setAttribute("aria-hidden", "true");
-  overlay.innerHTML =
-    '<div class="ladder-traveller"><div class="ladder-body"><div class="ladder-rungs"></div><i class="ladder-wheel left"></i><i class="ladder-wheel right"></i></div></div>';
-  document.body.append(overlay);
+  if (!overlay.isConnected) {
+    overlay.innerHTML =
+      '<div class="ladder-traveller"><div class="ladder-body"><div class="ladder-rungs"></div><i class="ladder-wheel left"></i><i class="ladder-wheel right"></i></div></div>';
+    document.body.append(overlay);
+  }
   const ladder = overlay.querySelector(".ladder-traveller");
   const app = document.querySelector(".app");
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
@@ -24,7 +26,7 @@ export function createReaderTransition(reader) {
     }
     const wasInert = app.inert;
     let reveal, travel;
-    reader.classList.add("reader-transition-layer");
+    reader.classList.add("room-transition-layer");
     reader.style.clipPath = opening ? "inset(0 100% 0 0)" : "inset(0)";
     document.body.classList.add("changing-room");
     app.inert = true;
@@ -38,7 +40,7 @@ export function createReaderTransition(reader) {
       const edge = (x) => `polygon(0 0, ${x}px 0, ${x}px 100%, 0 100%)`;
       const positions = opening ? [start, end] : [end, start];
       const timing = {
-        duration: 900,
+        duration: 780,
         easing: "cubic-bezier(.4,0,.2,1)",
         fill: "both",
       };
@@ -63,7 +65,7 @@ export function createReaderTransition(reader) {
         travel?.cancel();
         overlay.hidden = true;
         reader.style.removeProperty("clip-path");
-        reader.classList.remove("reader-transition-layer");
+        reader.classList.remove("room-transition-layer");
         document.body.classList.remove("changing-room");
         app.inert = wasInert;
       }

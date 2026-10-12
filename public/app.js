@@ -4,6 +4,7 @@ import {
   bookFileURL,
   libraryRequest,
 } from "./library-client.js";
+import { createReaderTransition } from "./reader-transition.js";
 import { setupReader } from "./reader.js";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
@@ -106,7 +107,7 @@ function renderCategories() {
 let lastColumns = 0;
 function shelfColumns() {
   const width = $("#shelves").clientWidth;
-  return Math.max(isDemo ? 3 : 4, Math.min(isDemo ? (width < 480 ? 3 : 6) : 14, Math.floor((width - 25) / 59)));
+  return Math.max(1, Math.min(isDemo ? (width < 700 ? 3 : 6) : 12, Math.floor((width - 40) / 72)));
 }
 function renderBooks() {
   if (!loaded) return;
@@ -117,14 +118,10 @@ function renderBooks() {
   $("#no-results").hidden = empty || list.length > 0;
   $("#book-count").textContent =
     `${list.length} ${list.length === 1 ? "volume" : "volumes"}`;
-  $("#result-line").textContent = empty
-    ? "Your collection is ready for its first book."
-    : query || category !== "All books"
-      ? `${list.length} ${list.length === 1 ? "match" : "matches"}${category === "All books" ? "" : ` in ${category}`}`
-      : "Select a spine to take a closer look.";
-  $("#shelf-hint").textContent = empty
-    ? "A quiet place for a growing collection."
-    : "Hover to lift · Select to hold · Drag to turn";
+  const hasFilters = Boolean(query.trim() || category !== "All books");
+  $("#filter-status").hidden = !hasFilters;
+  $("#result-line").textContent = hasFilters
+    ? [category === "All books" ? "" : category, `${list.length} ${list.length === 1 ? "book" : "books"}`].filter(Boolean).join(" · ") : "";
   $("#shelves").hidden = view !== "shelves" || (!empty && !list.length);
   $("#catalogue").hidden = view !== "catalogue" || empty || !list.length;
   $$("[data-view]").forEach((b) =>
@@ -133,10 +130,7 @@ function renderBooks() {
   $("#shelves").innerHTML = "";
   const columns = shelfColumns();
   lastColumns = columns;
-  const rows = Math.max(
-    empty ? 2 : isDemo ? 1 : 3,
-    Math.ceil(list.length / columns),
-  );
+  const rows = Math.max(1, Math.ceil(list.length / columns));
   for (let r = 0; r < rows; r++) {
     const shelf = document.createElement("div");
     shelf.className = "shelf";
@@ -157,7 +151,7 @@ function renderBooks() {
       button.style.setProperty("--book-color", color(book));
       button.style.setProperty(
         "--book-height",
-        `${(isDemo ? 168 : 132) + (n % 27)}px`,
+        `${190 + (n % 27)}px`,
       );
       button.style.setProperty("--book-width", `${42 + (n % 13)}px`);
       button.innerHTML = `<span class="binding"><span class="spine-title">${escapeHTML(book.title)}</span><span class="spine-format">${escapeHTML(book.formats[0] || "BOOK")}</span></span>${book.progress ? '<span class="ribbon" aria-hidden="true"></span>' : ""}`;
@@ -181,16 +175,17 @@ async function refresh() {
   if (selected) {
     selected = books.find((b) => b.id === selected.id) || null;
     if (selected) showBook(selected, false);
-    else closeInspector();
+    else await closeInspector();
   }
   renderBooks();
   $("#connection-status").innerHTML =
     '<span class="status-dot"></span>' +
     (isDemo
-      ? "Sample collection · saved in this browser"
-      : "calibre · local library");
+      ? "Demo · browser storage"
+      : "Local library");
 }
 function showBook(book, redraw = true) {
+  if (selected?.id !== book.id) $("#book-details").open = false;
   selected = book;
   $("#workspace").classList.add("has-selection");
   $("#inspector").hidden = false;
@@ -209,14 +204,14 @@ function showBook(book, redraw = true) {
     .map((t) => `<span class="tag">${escapeHTML(t)}</span>`)
     .join("");
   $("#reading-position").textContent = book.progress
-    ? `Saved at page ${book.progress.page} of ${book.progress.totalPages}`
+    ? `Page ${book.progress.page} of ${book.progress.totalPages}`
     : "";
   const hasPDF = book.formats.includes("PDF");
   $("#read-button").textContent = hasPDF
     ? book.progress
       ? "Continue reading"
-      : "Read PDF"
-    : "Open in calibre reader";
+      : "Read"
+    : "Open in calibre";
   $("#read-button").disabled = !book.formats.length;
   $("#downloads").innerHTML = book.formats
     .map(
@@ -249,11 +244,39 @@ function showBook(book, redraw = true) {
   animateBook();
   if (redraw) renderBooks();
 }
-function closeInspector() {
-  $("#inspector").hidden = true;
-  $("#workspace").classList.remove("has-selection");
-  selected = null;
-  renderBooks();
+const bookSweep = createReaderTransition($("#inspector"));
+let changingBook = false;
+let shelfScroll = 0;
+function setBookRoom(active) {
+  document.body.classList.toggle("viewing-book", active);
+  $("#workspace").inert = $(".header").inert = active;
+}
+async function openInspector(book) {
+  if (changingBook || !$("#reader").hidden) return;
+  changingBook = true;
+  shelfScroll = window.scrollY;
+  try {
+    await bookSweep(true, () => { showBook(book); $("#inspector").scrollTop = 0; }, () => setBookRoom(true));
+  } finally { changingBook = false; }
+  $("#close-inspector").focus({preventScroll:true});
+}
+async function closeInspector() {
+  if (changingBook || $("#inspector").hidden) return;
+  changingBook = true;
+  const id = selected?.id;
+  try {
+    await bookSweep(false, () => {
+      setBookRoom(false);
+      window.scrollTo({top:shelfScroll, behavior:"instant"});
+    }, () => {
+      $("#inspector").hidden = true;
+      $("#workspace").classList.remove("has-selection");
+      selected = null;
+      renderBooks();
+    });
+  } finally { changingBook = false; }
+  const target = document.querySelector(`#${view === "shelves" ? "shelves" : "catalogue"} [data-book="${id}"]`);
+  (target || $("#search")).focus({preventScroll:true});
 }
 let angleY = -26,
   angleX = -8,
@@ -367,6 +390,7 @@ $("#categories").addEventListener("click", (e) => {
     category = button.dataset.category;
     renderCategories();
     renderBooks();
+    $("#settings-dialog").close();
   }
 });
 $$("[data-view]").forEach((button) =>
@@ -381,9 +405,7 @@ $("#library-main").addEventListener("click", (e) => {
   if (button) {
     const book = books.find((b) => b.id === Number(button.dataset.book));
     if (book) {
-      showBook(book);
-      if (matchMedia('(max-width: 1000px)').matches)
-        requestAnimationFrame(() => $('#inspector').scrollIntoView({ behavior: motion ? 'smooth' : 'instant', block: 'start' }));
+      openInspector(book);
     }
   }
 });
@@ -400,7 +422,7 @@ $("#refresh-button").addEventListener("click", async (e) => {
   try {
     await refresh();
     toast(
-      isDemo ? "Sample shelves refreshed." : "Shelves refreshed from calibre.",
+      "Library refreshed.",
     );
   } catch (e) {
     toast(e.message, true);
@@ -503,7 +525,7 @@ $("#import-form").addEventListener("submit", async (e) => {
     await refresh();
     if (lastId) {
       const book = books.find((b) => b.id === lastId);
-      if (book) showBook(book);
+      if (book && !errors.length) { $("#import-dialog").close(); await openInspector(book); }
     }
   } catch (err) {
     errors.push(err.message);
@@ -582,16 +604,18 @@ $("#edit-form").addEventListener("submit", async (e) => {
   }
 });
 $("#settings-button").addEventListener("click", () => {
-  if (isDemo) {
-    $("#demo-dialog").showModal();
-    return;
-  }
-  $("#library-path").textContent =
-    status?.libraryPath || "Connection unavailable";
-  $("#calibre-version").textContent = status?.calibreVersion || "Not found";
-  $("#pdfjs-version").textContent =
-    `PDF.js ${status?.pdfjsVersion || ""} · served from this computer`;
+  $("#library-path").textContent = status?.libraryPath || "Unavailable";
+  $("#calibre-version").textContent = status?.calibreVersion || "Unavailable";
+  $("#pdfjs-version").textContent = status?.pdfjsVersion || "";
   $("#settings-dialog").showModal();
+});
+// Native dialogs keep keyboard focus contained; clicking the backdrop dismisses them.
+document.querySelectorAll("dialog").forEach(dialog => {
+  dialog.addEventListener("click", event => {
+    if (event.target !== dialog || (importing && dialog.id === "import-dialog")) return;
+    const box = dialog.getBoundingClientRect();
+    if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) dialog.close();
+  });
 });
 $("#open-calibre").addEventListener("click", async (e) => {
   e.currentTarget.disabled = true;
@@ -618,15 +642,16 @@ const reader = setupReader({
   },
 });
 $("#read-button").addEventListener("click", () => {
-  if (selected) reader.open(selected);
+  if (selected && !changingBook) reader.open(selected);
 });
 document.addEventListener("keydown", (event) => {
   if (
+    changingBook ||
     document.querySelector("dialog[open]") ||
     ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName)
   )
     return;
-  if (event.key === "/" && $("#reader").hidden) {
+  if (event.key === "/" && $("#reader").hidden && !selected) {
     event.preventDefault();
     $("#search").focus();
   }
@@ -652,6 +677,7 @@ async function init() {
     await refresh();
   } catch (err) {
     $("#connection-status").textContent = "Library connection unavailable";
+    $("#filter-status").hidden = false;
     $("#result-line").textContent = err.message;
     toast(err.message, true);
   }
@@ -659,21 +685,16 @@ async function init() {
 if (isDemo) {
   document.body.classList.add("demo-library");
   document.title = "The Den · A century on the shelf";
-  $("#demo-notice").hidden = false;
-  $(".local-label").textContent = "An open bookshelf";
-  $("#add-button").textContent = "Use The Den ↗";
-  $("#settings-button").textContent = "About";
-  $("#settings-button").setAttribute("aria-label", "About this demo");
+  $("#local-settings").hidden = true;
+  $("#demo-settings").hidden = false;
+  $("#add-button").setAttribute("aria-label", "Add your own books");
   $("#edit-button").hidden = true;
-  $(".section-heading .eyebrow").textContent = "The nineteenth century";
-  $(".section-heading h1").textContent = "A century on the shelf.";
-  $("#refresh-button").setAttribute("aria-label", "Refresh sample collection");
   $("#reset-demo").addEventListener("click", async () => {
     const { resetDemoProgress } = await import("./demo-library.js");
     resetDemoProgress();
     await refresh();
-    $("#demo-dialog").close();
-    toast("Sample reading progress reset.");
+    $("#settings-dialog").close();
+    toast("Reading progress reset.");
   });
 }
 init();

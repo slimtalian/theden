@@ -47,7 +47,7 @@ export function setupReader({ api, getBooks, onClose, toast }) {
       position = { page, totalPages: total };
     const save = async () => {
       if (book === currentBook)
-        $("#reader-save-status").textContent = "Saving position…";
+        $("#reader-save-status").textContent = "Saving…";
       try {
         const result = await api(`/api/books/${currentBook.id}/progress`, {
           method: "PUT",
@@ -59,7 +59,7 @@ export function setupReader({ api, getBooks, onClose, toast }) {
           $("#reader-save-status").textContent =
             result.persisted === false
               ? "Saved for this visit"
-              : "Position saved";
+              : "Saved";
       } catch (error) {
         if (book === currentBook)
           $("#reader-save-status").textContent = "Position not saved";
@@ -107,7 +107,7 @@ export function setupReader({ api, getBooks, onClose, toast }) {
     page = selected.progress?.page || 1;
     total = 0;
     $("#reader-title").textContent = book.title;
-    $("#reader-save-status").textContent = "Opening PDF…";
+    $("#reader-save-status").textContent = "Opening…";
     $("#reader-error").hidden = true;
     $("#download-pdf").href = bookFileURL(book, "PDF", true);
     $("#zoom").value = mode === "flip" ? "page" : "fit";

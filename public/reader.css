@@ -111,7 +111,7 @@ body.reading {
 body.changing-room {
   overflow: hidden;
 }
-.reader.reader-transition-layer {
+.room-transition-layer {
   position: fixed;
   inset: 0;
   width: 100%;
