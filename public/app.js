@@ -6,7 +6,7 @@ import {
 } from "./library-client.js";
 import { createReaderTransition } from "./reader-transition.js";
 import { setupReader } from "./reader.js";
-import { bookDesign, makeBookObject, makeCatalogueCover } from "./book-design.js";
+import { bookDesign, makeBookObject, makeCatalogueCover, coverKey, usesClothJacket } from "./book-design.js";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
 const escapeHTML = (v) =>
@@ -17,12 +17,12 @@ const escapeHTML = (v) =>
         c
       ],
   );
-let jackets = new Set();
+let originalCovers = new Set();
 try {
-  const saved = JSON.parse(localStorage.getItem("the-den-jackets") || "[]");
-  if (Array.isArray(saved)) jackets = new Set(saved.filter(value => typeof value === "string"));
+  const saved = JSON.parse(localStorage.getItem("the-den-original-covers") || "[]");
+  if (Array.isArray(saved)) originalCovers = new Set(saved.filter(value => typeof value === "string"));
 } catch {}
-const usesJacket = book => jackets.has(String(book.uuid || book.id));
+const usesJacket = book => usesClothJacket(book, originalCovers);
 let loaded = false,
   status,
   books = [],
@@ -403,9 +403,9 @@ for (const [id, direction] of [["categories-previous", -1], ["categories-next", 
 new ResizeObserver(updateCategoryRail).observe($("#categories"));
 $("#cloth-jacket").addEventListener("change", event => {
   if (!selected) return;
-  const key = String(selected.uuid || selected.id);
-  event.target.checked ? jackets.add(key) : jackets.delete(key);
-  try { localStorage.setItem("the-den-jackets", JSON.stringify([...jackets])); } catch {}
+  const key = coverKey(selected);
+  event.target.checked ? originalCovers.delete(key) : originalCovers.add(key);
+  try { localStorage.setItem("the-den-original-covers", JSON.stringify([...originalCovers])); } catch {}
   showBook(selected);
 });
 $$("[data-view]").forEach((button) =>
