@@ -1,3 +1,22 @@
+const scrollLocks = new Set();
+let savedScroll;
+export function lockLibraryScroll(owner) {
+  if (!scrollLocks.size) {
+    const body = document.body;
+    const keys = ["position", "top", "left", "right", "width", "paddingRight"];
+    savedScroll = {x:window.scrollX, y:window.scrollY, styles:Object.fromEntries(keys.map(key => [key, body.style[key]]))};
+    const width = body.getBoundingClientRect().width;
+    Object.assign(body.style, {position:"fixed", top:`${-savedScroll.y}px`, left:"0", right:"auto", width:`${width}px`});
+  }
+  scrollLocks.add(owner);
+}
+export function unlockLibraryScroll(owner) {
+  if (!scrollLocks.delete(owner) || scrollLocks.size || !savedScroll) return;
+  Object.assign(document.body.style, savedScroll.styles);
+  window.scrollTo({left:savedScroll.x, top:savedScroll.y, behavior:"instant"});
+  savedScroll = null;
+}
+
 // Keep both real views mounted while the ladder reveals a book or its reader.
 // This also works in browsers without the View Transition API.
 export function createReaderTransition(reader) {
@@ -40,7 +59,7 @@ export function createReaderTransition(reader) {
       const edge = (x) => `polygon(0 0, ${x}px 0, ${x}px 100%, 0 100%)`;
       const positions = opening ? [start, end] : [end, start];
       const timing = {
-        duration: 780,
+        duration: matchMedia("(max-width: 680px)").matches ? 560 : 780,
         easing: "cubic-bezier(.4,0,.2,1)",
         fill: "both",
       };

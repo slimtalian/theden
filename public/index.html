@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" data-mode="local">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="color-scheme" content="dark" />
   <meta name="description" content="The Den — your local personal library, managed by calibre." />
   <title>The Den · Your library</title>
@@ -26,10 +26,12 @@
         <h1 class="sr-only">Your library</h1>
         <div class="category-rail" id="category-rail" hidden><button class="rail-arrow" id="categories-previous" aria-label="Previous categories" disabled>‹</button><nav id="categories" aria-label="Browse categories"></nav><button class="rail-arrow" id="categories-next" aria-label="More categories">›</button></div>
         <div class="filter-status" id="filter-status" hidden><span id="result-line" aria-live="polite"></span><button id="clear-filters" class="quiet" aria-label="Clear filters">Clear ×</button></div>
+        <div id="library-scroll" class="library-scroll" tabindex="0" role="region" aria-label="Library collection">
         <div id="empty-state" class="empty-state" hidden><h2>Your shelves await.</h2><button class="primary" id="first-book">Add books</button><p>or drop a PDF or EPUB here</p></div>
         <div id="no-results" class="no-results" hidden><h2>No books found.</h2></div>
-        <section id="shelves" class="shelves" aria-label="Book shelves"></section>
+        <section id="shelves" class="shelves" aria-label="Book shelves" aria-description="Swipe left or right to change category. Tap a spine to open a book."></section>
         <section id="catalogue" class="catalogue" aria-label="Book catalogue" hidden></section>
+        </div>
       </main>
     </div>
     <section id="inspector" class="inspector" aria-label="Selected book" hidden>
@@ -70,6 +72,7 @@
         <header class="reader-heading">
           <button id="back-to-library" class="quiet">← Book</button>
           <h1 id="reader-title"></h1>
+          <button id="reader-tools-toggle" class="quiet" aria-label="Reading tools" aria-expanded="false" aria-controls="reader-tools">•••</button>
           <span
             class="saved-state"
             id="reader-save-status"
@@ -80,7 +83,7 @@
           <button id="prev-page" class="quiet" aria-label="Previous page">
             ←</button
           ><label
-            >Page
+            ><span class="page-label">Page</span>
             <input
               id="page-number"
               type="number"
@@ -102,8 +105,8 @@
               Pages
             </button>
           </div>
-          <span class="sr-only" id="reader-mode-hint">Scroll to read</span
-          ><label class="sr-only" for="zoom">PDF zoom</label
+          <span class="sr-only" id="reader-mode-hint">Scroll to read</span>
+          <div id="reader-tools" class="reader-tools"><label class="sr-only" for="zoom">PDF zoom</label
           ><select id="zoom">
             <option value="fit">Fit width</option>
             <option value="page">Fit page</option>
@@ -118,7 +121,7 @@
             aria-label="Rotate PDF page clockwise"
           >
             ↻ Rotate</button
-          ><a id="download-pdf" class="quiet" download>Download</a>
+          ><a id="download-pdf" class="quiet" download>Download</a></div>
         </div>
         <div class="reader-error" id="reader-error" role="alert" hidden></div>
         <div class="paper-area" id="paper-area"></div>

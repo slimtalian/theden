@@ -68,35 +68,48 @@ body.reading {
   margin: 8px 20px;
   font-size: 12px;
 }
+#reader-tools-toggle { display: none; }
+.reader-tools { display: flex; align-items: center; gap: 9px; }
 @media (max-width: 650px) {
   .reader-heading {
-    padding: 8px 10px 0;
-    flex-wrap: wrap;
-    gap: 5px 10px;
+    padding: max(6px, env(safe-area-inset-top)) 10px 6px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) 44px;
+    gap: 8px;
   }
   .reader-heading h1 {
-    order: 3;
-    flex-basis: 100%;
-    font-size: 18px;
-    padding: 4px 10px;
+    order: 0; font-size: 16px; padding: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .reader-heading .saved-state {
-    font-size: 10px;
-    margin-left: auto;
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
   }
+  #reader-tools-toggle { display: block; width: 44px; min-height: 44px; }
+  #back-to-library { min-height: 44px; padding-inline: 4px; white-space: nowrap; }
+  .reader-heading { order: 0; }
+  .reader-error { order: 1; }
+  .paper-area { order: 2; }
   .reader-controls {
-    justify-content: center;
-    gap: 2px 5px;
-    padding: 4px 8px 8px;
+    position: relative; order: 3;
+    display: grid; grid-template-columns: 44px minmax(64px, 1fr) 44px auto;
+    gap: 2px; padding: 6px max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    border: 0; border-top: 1px solid var(--line);
   }
   .reader-controls .quiet {
-    padding: 6px 8px;
-    min-height: 38px;
+    padding: 6px 8px; min-height: 44px;
   }
-  .reader-controls input {
-    width: 52px;
-    font-size: 16px;
+  .reader-controls .page-label, .reader-controls .control-divider { display: none; }
+  .reader-controls > label { justify-content: center; gap: 3px; font-size: 10px; }
+  .reader-controls #page-number { width: 37px; min-height: 44px; padding: 4px 2px; font-size: 16px; appearance: textfield; }
+  #page-number::-webkit-inner-spin-button, #page-number::-webkit-outer-spin-button { appearance: none; margin: 0; }
+  .reader-mode { padding: 3px; }
+  .reader-mode button { min-height: 44px; font-size: 11px; padding: 6px 9px; }
+  .reader-tools {
+    display: none; position: absolute; bottom: calc(100% + 8px); right: max(8px, env(safe-area-inset-right)); z-index: 10;
+    max-width: calc(100vw - 16px); padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); box-shadow: 0 8px 30px #0006;
   }
+  .tools-open .reader-tools { display: flex; }
+  .reader-tools select { min-height: 44px; font-size: 16px; max-width: 130px; }
   .scroll-label {
     display: none;
   }

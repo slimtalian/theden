@@ -4,7 +4,8 @@ import {
   bookFileURL,
   libraryRequest,
 } from "./library-client.js";
-import { createReaderTransition } from "./reader-transition.js";
+import { createReaderTransition, lockLibraryScroll, unlockLibraryScroll } from "./reader-transition.js";
+import { bindHorizontalDrag, swipePageDelta } from "./reader-gestures.js";
 import { setupReader } from "./reader.js";
 import { bookDesign, makeBookObject, makeCatalogueCover, coverKey, usesClothJacket } from "./book-design.js";
 const $ = (s) => document.querySelector(s),
@@ -136,25 +137,36 @@ function animateLibraryElement(element, frames, duration = 520) {
 function captureLibraryLayout(animate) {
   const before = animate && motion && !matchMedia("(prefers-reduced-motion: reduce)").matches ? new Map() : null;
   const container = view === "shelves" ? $("#shelves") : $("#catalogue");
+  const bounds = libraryBounds();
   if (before) {
     // Sample current positions, including an interrupted transition, before cancelling it.
     for (const node of [...(container.hidden ? [] : container.querySelectorAll("[data-layout-key]")),
       ...(departingBooks?.querySelectorAll("[data-layout-key]") || [])]) {
       const key = node.dataset.layoutKey;
-      if (!before.has(key)) before.set(key, {node, rect:node.getBoundingClientRect(), opacity:getComputedStyle(node).opacity});
+      const rect = node.getBoundingClientRect();
+      if (!before.has(key) && rect.bottom > bounds.top && rect.top < bounds.bottom)
+        before.set(key, {node, rect, opacity:getComputedStyle(node).opacity});
     }
   }
   stopLibraryMotion();
+  $("#shelves").style.removeProperty("translate");
+  if (animate) $("#library-scroll").scrollTop = 0;
   return before;
+}
+function libraryBounds() {
+  const scroll = $("#library-scroll");
+  return scroll.clientHeight ? scroll.getBoundingClientRect() : {top:0, bottom:innerHeight};
 }
 function flowLibraryLayout(before) {
   if (!before) return;
   const container = view === "shelves" ? $("#shelves") : $("#catalogue");
+  const bounds = libraryBounds();
   for (const node of container.hidden ? [] : container.querySelectorAll("[data-layout-key]")) {
+    const rect = node.getBoundingClientRect();
+    if (rect.bottom <= bounds.top || rect.top >= bounds.bottom) continue;
     const previous = before.get(node.dataset.layoutKey);
     before.delete(node.dataset.layoutKey);
     if (previous) {
-      const rect = node.getBoundingClientRect();
       const x = previous.rect.left - rect.left, y = previous.rect.top - rect.top;
       if (Math.abs(x) + Math.abs(y) > .5 || Number(previous.opacity) < .99)
         animateLibraryElement(node, [{transform:`translate(${x}px, ${y}px)`, opacity:previous.opacity}, {transform:"none", opacity:1}]);
@@ -168,6 +180,7 @@ function flowLibraryLayout(before) {
   layer.setAttribute("aria-hidden", "true");
   layer.inert = true;
   const origin = $("#library-main").getBoundingClientRect();
+  layer.style.clipPath = `inset(${Math.max(0, bounds.top - origin.top)}px 0 ${Math.max(0, origin.bottom - bounds.bottom)}px)`;
   const exits = [];
   for (const {node, rect, opacity} of before.values()) {
     const ghost = node.cloneNode(true);
@@ -196,6 +209,7 @@ function shelfColumns() {
 }
 function renderBooks({animate = false} = {}) {
   if (!loaded) return;
+  const scrollTop = $("#library-scroll").scrollTop;
   const before = captureLibraryLayout(animate);
   const list = filtered();
   const empty = books.length === 0;
@@ -265,6 +279,7 @@ function renderBooks({animate = false} = {}) {
     return button;
   }));
   flowLibraryLayout(before);
+  if (!animate) $("#library-scroll").scrollTop = scrollTop;
 }
 async function refresh() {
   const result = await api("/api/books?refresh=1");
@@ -333,7 +348,9 @@ function setBookRoom(active) {
 async function openInspector(book) {
   if (changingBook || !$("#reader").hidden) return;
   changingBook = true;
-  shelfScroll = window.scrollY;
+  shelfScroll = $("#library-scroll").scrollTop;
+  document.activeElement?.blur();
+  lockLibraryScroll("book");
   try {
     await bookSweep(true, () => { showBook(book); $("#inspector").scrollTop = 0; }, () => setBookRoom(true));
   } finally { changingBook = false; }
@@ -346,12 +363,13 @@ async function closeInspector() {
   try {
     await bookSweep(false, () => {
       setBookRoom(false);
-      window.scrollTo({top:shelfScroll, behavior:"instant"});
     }, () => {
       $("#inspector").hidden = true;
       $("#workspace").classList.remove("has-selection");
       selected = null;
       renderBooks();
+      $("#library-scroll").scrollTop = shelfScroll;
+      unlockLibraryScroll("book");
     });
   } finally { changingBook = false; }
   const target = document.querySelector(`#${view === "shelves" ? "shelves" : "catalogue"} [data-book="${id}"]`);
@@ -364,8 +382,7 @@ let angleY = -26,
   vy = 0,
   vx = 0,
   raf = 0,
-  lastFrame = 0,
-  drag = null;
+  lastFrame = 0;
 function paintBook() {
   $("#book-object").style.transform =
     `rotateX(${angleX}deg) rotateY(${angleY}deg)`;
@@ -410,31 +427,29 @@ function animateBook() {
     raf = requestAnimationFrame(bookFrame);
   }
 }
-$("#book-stage").addEventListener("pointerdown", (e) => {
-  if (e.button !== 0) return;
-  drag = { x: e.clientX, y: e.clientY };
-  e.currentTarget.setPointerCapture(e.pointerId);
-  e.currentTarget.classList.add("is-held");
+let heldY = 0, heldX = 0;
+bindHorizontalDrag($("#book-stage"), {
+  allowMouse:true,
+  canStart:() => Boolean(selected) && !changingBook,
+  onPress:() => { heldY = angleY; heldX = angleX; },
+  onStart:() => {
+    cancelAnimationFrame(raf); raf = 0; vy = vx = 0;
+    $("#book-stage").classList.add("is-held");
+  },
+  onMove:({dx, dy}) => {
+    // Direct tracking under the finger, then a weighted settle on release.
+    angleY = targetY = heldY + dx * .68;
+    angleX = targetX = Math.max(-30, Math.min(25, heldX - dy * .15));
+    paintBook();
+  },
+  onEnd:({velocityX}) => {
+    $("#book-stage").classList.remove("is-held");
+    targetY += motion ? Math.max(-65, Math.min(65, velocityX * 70)) : 0;
+    targetX = -8;
+    animateBook();
+  },
+  onCancel:() => { $("#book-stage").classList.remove("is-held"); },
 });
-$("#book-stage").addEventListener("pointermove", (e) => {
-  if (!drag) return;
-  targetY += (e.clientX - drag.x) * 0.85;
-  targetX = Math.max(-35, Math.min(35, targetX - (e.clientY - drag.y) * 0.3));
-  drag = { x: e.clientX, y: e.clientY };
-  animateBook();
-});
-function endDrag(e) {
-  if (!drag) return;
-  drag = null;
-  e.currentTarget.classList.remove("is-held");
-  if (e.currentTarget.hasPointerCapture(e.pointerId))
-    e.currentTarget.releasePointerCapture(e.pointerId);
-  targetY += motion ? Math.max(-40, Math.min(40, vy * 5)) : 0;
-  targetX = -8;
-  animateBook();
-}
-$("#book-stage").addEventListener("pointerup", endDrag);
-$("#book-stage").addEventListener("pointercancel", endDrag);
 $("#rotate-left").addEventListener("click", () => {
   targetY -= 45;
   animateBook();
@@ -467,14 +482,48 @@ $("#sort").addEventListener("change", (e) => {
   sort = e.target.value;
   renderBooks({animate:true});
 });
-$("#categories").addEventListener("click", (e) => {
-  const button = e.target.closest("[data-category]");
+function selectCategory(button) {
   if (button && button.dataset.category !== category) {
     category = button.dataset.category;
     $$("[data-category]").forEach(item => item.setAttribute("aria-pressed", String(item.dataset.category === category)));
     renderBooks({animate:true});
     revealCategory(button);
   }
+}
+$("#categories").addEventListener("click", (e) => {
+  selectCategory(e.target.closest("[data-category]"));
+});
+let touchedSpine, shelfOffset = 0, shelfReturn;
+const clearSpineTouch = () => { touchedSpine?.classList.remove("touch-held"); touchedSpine = null; };
+function settleShelves() {
+  clearSpineTouch();
+  const shelf = $("#shelves"), from = shelf.style.translate;
+  shelf.style.removeProperty("translate");
+  if (from && motion) shelfReturn = shelf.animate([{translate:from}, {translate:"0px"}], {duration:240, easing:"ease-out"});
+  shelfOffset = 0;
+}
+bindHorizontalDrag($("#shelves"), {
+  canStart:event => !selected && !changingBook && $$("#categories button").length > 1
+    && event.clientX > 20 && event.clientX < innerWidth - 20,
+  onPress:event => {
+    shelfReturn?.cancel();
+    touchedSpine = event.target.closest(".volume");
+    touchedSpine?.classList.add("touch-held");
+  },
+  onStart:clearSpineTouch,
+  onMove:({dx}) => {
+    shelfOffset = Math.max(-52, Math.min(52, dx * .28));
+    if (motion) $("#shelves").style.translate = `${shelfOffset}px 0`;
+  },
+  onEnd:({dx, dy, elapsed}) => {
+    clearSpineTouch();
+    const items = $$("#categories button");
+    const next = items.findIndex(button => button.dataset.category === category) + swipePageDelta(dx, dy, elapsed);
+    if (items[next] && items[next].dataset.category !== category) selectCategory(items[next]);
+    else settleShelves();
+    shelfOffset = 0;
+  },
+  onCancel:settleShelves,
 });
 $("#categories").addEventListener("scroll", updateCategoryRail, {passive:true});
 $("#categories").addEventListener("keydown", event => {
@@ -504,6 +553,7 @@ $("#cloth-jacket").addEventListener("change", event => {
 $$("[data-view]").forEach((button) =>
   button.addEventListener("click", () => {
     view = button.dataset.view;
+    $("#library-scroll").scrollTop = 0;
     renderBooks();
     savePrefs();
   }),

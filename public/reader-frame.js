@@ -1,5 +1,5 @@
 import * as pdfjs from "./vendor/pdfjs/build/pdf.mjs";
-import { swipePageDelta } from "./reader-gestures.js";
+import { bindHorizontalDrag, swipePageDelta } from "./reader-gestures.js";
 
 // Keep the upstream viewer's styles inside this document, away from the library.
 const { PDFViewer, EventBus, PDFLinkService, ScrollMode } = await import(
@@ -279,61 +279,55 @@ document.addEventListener("keydown", (event) => {
 
 // Only fitted pages accept page-turn swipes. Zoomed pages retain native panning,
 // and a second finger cancels the gesture so pinch zoom cannot turn a page.
-const touches = new Set();
-let swipe;
-container.addEventListener("pointerdown", (event) => {
-  if (event.pointerType !== "touch") return;
-  touches.add(event.pointerId);
-  if (touches.size > 1) {
-    swipe = null;
-    return;
-  }
-  if (
-    !ready ||
-    mode !== "flip" ||
-    container.classList.contains("page-pannable") ||
-    event.target.closest(
-      "a, input, textarea, select, button, .annotationLayer",
-    ) ||
-    !getSelection().isCollapsed
-  )
-    return;
-  swipe = {
-    id: event.pointerId,
-    x: event.clientX,
-    y: event.clientY,
-    time: performance.now(),
-  };
-});
-container.addEventListener("pointerup", (event) => {
-  touches.delete(event.pointerId);
-  const start = swipe;
-  swipe = null;
-  if (
-    !start ||
-    start.id !== event.pointerId ||
-    mode !== "flip" ||
-    !getSelection().isCollapsed
-  )
-    return;
-  const delta = swipePageDelta(
-    event.clientX - start.x,
-    event.clientY - start.y,
-    performance.now() - start.time,
-  );
-  if (delta) goToPage(viewer.currentPageNumber + delta);
-});
-container.addEventListener("pointercancel", (event) => {
-  touches.delete(event.pointerId);
-  swipe = null;
+let swipedPage;
+function settlePage() {
+  if (!swipedPage) return;
+  const page = swipedPage, from = page.style.transform;
+  page.style.removeProperty("transform");
+  if (from && !reducedMotion.matches)
+    turnAnimation = page.animate([{transform:from}, {transform:"none"}], {duration:180, easing:"ease-out"});
+  swipedPage = null;
+}
+bindHorizontalDrag(container, {
+  canStart:event => ready && mode === "flip" && !container.classList.contains("page-pannable")
+    && !event.target.closest("a, input, textarea, select, button, .annotationLayer")
+    && getSelection().isCollapsed,
+  onStart:() => {
+    turnAnimation?.cancel();
+    swipedPage = viewer.getPageView(viewer.currentPageNumber - 1)?.div;
+  },
+  onMove:({dx}) => {
+    if (swipedPage && !reducedMotion.matches)
+      swipedPage.style.transform = `translateX(${Math.max(-70, Math.min(70, dx * .35))}px)`;
+  },
+  onEnd:({dx, dy, elapsed}) => {
+    const delta = getSelection().isCollapsed ? swipePageDelta(dx, dy, elapsed) : 0;
+    const next = viewer.currentPageNumber + delta;
+    if (delta && next > 0 && next <= documentPDF.numPages) {
+      swipedPage?.style.removeProperty("transform");
+      swipedPage = null;
+      goToPage(next);
+    } else settlePage();
+  },
+  onCancel:settlePage,
 });
 let resizeTimer;
+let lastWidth = container.clientWidth;
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
     if (!ready) return;
-    if (["page-width", "page-fit"].includes(viewer.currentScaleValue))
-      viewer.currentScaleValue = viewer.currentScaleValue;
+    const widthChanged = container.clientWidth !== lastWidth;
+    lastWidth = container.clientWidth;
+    // Browser bars and the keyboard change height. They must not reset a
+    // continuous reading position when the fitted paper width is unchanged.
+    const scale = viewer.currentScaleValue;
+    if (scale === "page-fit" || (scale === "page-width" && widthChanged)) {
+      const page = viewer.getPageView(viewer.currentPageNumber - 1)?.div;
+      const offset = page ? (container.scrollTop - page.offsetTop) / page.clientHeight : 0;
+      viewer.currentScaleValue = scale;
+      if (mode === "scroll" && page) container.scrollTop = page.offsetTop + offset * page.clientHeight;
+    }
     viewer.update();
     syncPan();
   }, 100);

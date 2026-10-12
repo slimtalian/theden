@@ -1,5 +1,5 @@
 import { appURL, bookFileURL } from "./library-client.js";
-import { createReaderTransition } from "./reader-transition.js";
+import { createReaderTransition, lockLibraryScroll, unlockLibraryScroll } from "./reader-transition.js";
 
 export function setupReader({ api, getBooks, onClose, toast }) {
   const $ = (selector) => document.querySelector(selector);
@@ -13,8 +13,7 @@ export function setupReader({ api, getBooks, onClose, toast }) {
   let saveQueue = Promise.resolve();
   const sweep = createReaderTransition($("#reader"));
   let opening = false,
-    closeAfterOpen = false,
-    libraryScroll = 0;
+    closeAfterOpen = false;
   let mode = "scroll";
   try {
     if (localStorage.getItem("den-reader-mode") === "flip") mode = "flip";
@@ -102,7 +101,8 @@ export function setupReader({ api, getBooks, onClose, toast }) {
     }
     if (book || opening || closing) return;
     opening = true;
-    libraryScroll = window.scrollY;
+    lockLibraryScroll("reader");
+    setTools(false);
     book = selected;
     page = selected.progress?.page || 1;
     total = 0;
@@ -151,13 +151,13 @@ export function setupReader({ api, getBooks, onClose, toast }) {
       () => {
         $("#workspace").hidden = $(".toolbar").hidden = false;
         document.body.classList.remove("reading");
-        window.scrollTo({ top: libraryScroll, behavior: "instant" });
       },
       () => {
         // Keep the rendered PDF visible until the ladder has passed, then release it.
         frame?.remove();
         frame = null;
         $("#reader").hidden = true;
+        unlockLibraryScroll("reader");
       },
     );
     await saving;
@@ -239,6 +239,19 @@ export function setupReader({ api, getBooks, onClose, toast }) {
     if (passwordPending) close();
   });
   $("#back-to-library").addEventListener("click", close);
+  function setTools(open) {
+    $("#reader").classList.toggle("tools-open", open);
+    $("#reader-tools-toggle").setAttribute("aria-expanded", String(open));
+  }
+  $("#reader-tools-toggle").addEventListener("click", () =>
+    setTools(!$("#reader").classList.contains("tools-open")));
+  $("#reader-tools").addEventListener("keydown", event => {
+    if (event.key === "Escape" && matchMedia("(max-width: 650px)").matches) {
+      event.stopPropagation();
+      setTools(false);
+      $("#reader-tools-toggle").focus({preventScroll:true});
+    }
+  });
   $("#prev-page").addEventListener("click", () =>
     post("page", { page: page - 1 }),
   );
