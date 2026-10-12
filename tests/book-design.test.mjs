@@ -1,6 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { bookDesign, jacketSVG, jacketURL } from "../public/book-design.js";
+import { bookDesign, jacketSVG, jacketURL, usesClothJacket } from "../public/book-design.js";
+
+test("every book gets a cloth cover unless its original artwork is explicitly selected", () => {
+  const book = {uuid:"sample-volume",cover:"./cover.svg"};
+  assert.equal(usesClothJacket(book), true);
+  const originals = new Set([book.uuid]);
+  assert.equal(usesClothJacket(book, originals), false);
+  assert.equal(usesClothJacket({...book,uuid:"new-volume"}, originals), true);
+  assert.equal(usesClothJacket({...book,cover:null}, originals), true);
+});
 
 test("a book keeps its binding when its metadata changes", () => {
   const book = {uuid:"sample-volume", title:"A First Title", authors:"A Writer", tags:[]};
