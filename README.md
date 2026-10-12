@@ -40,7 +40,9 @@ npm ci
 npm start
 ```
 
-Open **http://127.0.0.1:4317/**. On Windows, after installing dependencies, you can also double-click **Start The Den.cmd** and use **Stop The Den.cmd** to stop it. The launcher verifies the project owning the port and will not stop another app.
+With `npm start`, open **http://127.0.0.1:4317/**. On Windows, after installing dependencies, **Start The Den.cmd** starts the server on **0.0.0.0:4317** and opens this PC's network address. Use the printed network address on another device on the same network. **Stop The Den.cmd** stops this project's recorded process with either binding. The launcher verifies the project owning the port and will not stop another app.
+
+`0.0.0.0` is a listening address, not a browser destination. The launcher uses localhost for its startup check and as a fallback when no network address is available. For local-only use, stop The Den and run `powershell -NoProfile -ExecutionPolicy Bypass -File .\start-den.ps1 -LocalOnly`. If an existing process uses a different binding, Start asks you to stop it first.
 
 Add a PDF or EPUB using **Add books**, or drop it onto the shelves. Files are copied into your own library; their originals are not moved. Use **Library → Open this library in calibre** for more detailed management, then **Refresh** in The Den.
 
@@ -48,11 +50,11 @@ Windows is the primary locally tested platform. The server also supports calibre
 
 ### Optional configuration
 
-Defaults work without configuration. Copy `config.example.json` to **config.local.json** only if needed. Relative paths are resolved from the project folder. The example uses a separate library under `data/library` and loopback-only access.
+Defaults work without configuration. Copy `config.example.json` to **config.local.json** only if needed. Relative paths are resolved from the project folder. The example uses a separate library under `data/library` and loopback-only access for `npm start`. The Windows launcher explicitly chooses network access by default, or loopback with `-LocalOnly`.
 
 For a nonstandard calibre installation, add a `calibreDirectory` field pointing to its executable directory. On Windows, use a short project/library path; calibre has a conservative 74-character limit for the library root in this app.
 
-To use a phone on a **trusted local network**, set `host` to `0.0.0.0` and restart. The console prints available network URLs. This prototype has no user authentication: anyone with network access to it can read and manage that library. Keep it off the public internet. The default `127.0.0.1` accepts this computer only.
+To use a phone on a **trusted local network**, use the Windows launcher, or set `host` to `0.0.0.0` and restart with `npm start`. The console prints available network URLs. This prototype has no user authentication: anyone with network access to it can read and manage that library. Keep it off the public internet. Binding to `127.0.0.1` accepts this computer only.
 
 The terminal server also accepts `DEN_PORT`, `DEN_HOST`, `DEN_DATA_DIR`, and `CALIBRE_DIRECTORY`. The Windows launcher uses port 4317. If that port is busy, it refuses to replace the running process.
 
