@@ -76,6 +76,12 @@ for (const rel of tracked)
   );
 const dist = path.join(root, "dist"),
   built = await walk(dist);
+// The demo must use the current local UI, not stale copies of shared assets.
+for (const entry of await fs.readdir(path.join(root, "public"), {withFileTypes:true})) {
+  if (!entry.isFile() || entry.name === "index.html") continue;
+  assert.ok((await fs.readFile(path.join(root, "public", entry.name)))
+    .equals(await fs.readFile(path.join(dist, entry.name))), `Stale or missing demo UI: ${entry.name}`);
+}
 for (const rel of built) {
   assert.ok(!forbiddenPath.test(rel), `Private/runtime file in demo: ${rel}`);
   if (!rel.startsWith("vendor/") && /\.(?:js|css|html|svg|json)$/.test(rel)) {
