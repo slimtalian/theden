@@ -100,7 +100,7 @@ function renderCategories() {
         `<button type="button" data-category="${escapeHTML(name)}" aria-pressed="${name === category}" aria-label="${escapeHTML(name)}, ${count} ${count === 1 ? "book" : "books"}"><span>${escapeHTML(name)}</span><span class="category-count" aria-hidden="true">${count}</span></button>`,
     )
     .join("");
-  $("#categories").scrollLeft = previousScroll;
+  $("#categories").scrollLeft = category === "All books" ? 0 : previousScroll;
   $("#category-rail").hidden = !books.length;
   requestAnimationFrame(updateCategoryRail);
 }
