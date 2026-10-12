@@ -32,6 +32,7 @@ const applicationFiles = [
   "books-mark.svg",
   "logo.svg",
   "book.css",
+  "book-design.js",
   "pdf-text-layer.css",
   "reader.js",
   "reader.css",
