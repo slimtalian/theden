@@ -11,9 +11,9 @@ The Den is a local library companion to [Tumbleweed](https://slimtalian.github.i
 ## How it works
 
 - Lift a book spine with a pointer or keyboard focus. Select it to inspect a cover, then drag to rotate the book with a damped, weighted motion.
-- Find a book by title, author, series, or category. Switch between shelves and a compact catalogue.
+- Search by title, author, series, or category. Switch between shelves and a compact catalogue. Open **Library** for categories, sorting, motion, and management tools.
 - Read PDFs with continuous vertical scrolling or page-by-page navigation. In page mode, click the paper's left or right edge; fitted pages also support touch swipes. Zoomed pages remain pannable.
-- A library ladder sweeps across when entering and leaving the reader. Page turns remain subtle. Gentle motion and the system's reduced-motion setting are respected.
+- A library ladder reveals a full-screen book view when you select a spine, and sweeps back when you return. The same transition opens and closes the reader; PDF page turns stay subtle. Gentle motion and the system's reduced-motion setting are respected.
 - Resume a PDF at its saved page. Download the untouched original whenever you need it.
 - In the local app, import PDFs and EPUBs and edit their metadata through calibre. EPUBs open in calibre's desktop reader.
 
