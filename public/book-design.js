@@ -17,6 +17,69 @@ export function bookDesign(book) {
   };
 }
 
+// Wrap across the binding before reducing the type. Keep every character,
+// including long unbroken names, instead of clipping the distinguishing suffix.
+export function spineLayout(title, design, measure) {
+  const text = String(title || "Untitled").trim().replace(/\s+/g, " ") || "Untitled";
+  const width = design.height - 52, height = design.depth - 8;
+  const wrap = size => {
+    const output = [];
+    let line = "";
+    for (const word of text.split(" ")) {
+      if (line && measure(`${line} ${word}`, size) <= width - 4) { line += ` ${word}`; continue; }
+      if (line) { output.push(line); line = ""; }
+      for (const character of Array.from(word)) {
+        if (line && measure(line + character, size) > width - 4) { output.push(line); line = ""; }
+        line += character;
+      }
+    }
+    if (line) output.push(line);
+    return output;
+  };
+  let low = .25, high = 13;
+  for (let i = 0; i < 12; i++) {
+    const size = (low + high) / 2;
+    if (wrap(size).length * size * 1.15 <= height - 2) low = size;
+    else high = size;
+  }
+  const size = Math.floor(low * 100) / 100;
+  const lines = wrap(size);
+  // Avoid a lonely volume number or one short word on the second line.
+  if (text.split(" ").every(word => measure(word, size) <= width - 4)) {
+    for (let index = lines.length - 2; index >= 0; index--) {
+      let split;
+      while ((split = lines[index].lastIndexOf(" ")) > 0) {
+        const first = lines[index].slice(0, split);
+        const next = lines[index].slice(split + 1) + " " + lines[index + 1];
+        const before = Math.abs(measure(lines[index], size) - measure(lines[index + 1], size));
+        if (measure(next, size) > width - 4 || Math.abs(measure(first, size) - measure(next, size)) >= before) break;
+        lines[index] = first; lines[index + 1] = next;
+      }
+    }
+  }
+  return {width, height, size, lines};
+}
+
+let spineCanvas;
+const spineCache = new Map();
+function spineSVG(book, design) {
+  const key = JSON.stringify([book.title, design.height, design.depth]);
+  if (spineCache.has(key)) return spineCache.get(key);
+  spineCanvas ||= document.createElement("canvas").getContext("2d");
+  spineCanvas.font = "100px Georgia, serif";
+  const widths = new Map();
+  const measure = (text, size) => {
+    if (!widths.has(text)) widths.set(text, spineCanvas.measureText(text).width / 100);
+    return widths.get(text) * size;
+  };
+  const {width, height, size, lines} = spineLayout(book.title, design, measure);
+  const first = height / 2 - (lines.length - 1) * size * 1.15 / 2 + size * .32;
+  const svg = `<svg class="spine-name" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" aria-hidden="true"><text text-anchor="middle" font-family="Georgia,serif" font-size="${size}" fill="currentColor">${lines.map((line, index) => `<tspan x="${width / 2}" y="${first + index * size * 1.15}">${escape(line)}</tspan>`).join("")}</text></svg>`;
+  if (spineCache.size >= 500) spineCache.delete(spineCache.keys().next().value);
+  spineCache.set(key, svg);
+  return svg;
+}
+
 function lines(text, length, maximum) {
   const words = String(text || "Untitled").trim().split(/\s+/);
   const result = [];
@@ -90,7 +153,7 @@ export function makeBookObject(book, { jacket = true } = {}) {
   object.style.setProperty("--jacket", `url("${jacketURL(book)}")`);
   object.innerHTML = `<span class="face front jacket-front"></span>
     <span class="face back"><span class="back-title">${escape(book.title)}</span><span class="back-author">${escape(book.authors)}</span><span class="back-mark">❧</span></span>
-    <span class="face spine"><span class="spine-name">${escape(book.title)}</span><small class="spine-format">${escape(book.formats?.[0] || "BOOK")}</small></span>
+    <span class="face spine">${spineSVG(book, design)}<small class="spine-format">${escape(book.formats?.[0] || "BOOK")}</small></span>
     <span class="face pages"></span><span class="face top"></span><span class="face bottom"></span>
     <span class="board-edge front-top"></span><span class="board-edge front-bottom"></span><span class="board-edge front-fore"></span>
     <span class="board-edge back-top"></span><span class="board-edge back-bottom"></span><span class="board-edge back-fore"></span>`;

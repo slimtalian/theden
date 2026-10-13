@@ -34,7 +34,12 @@ let documentPDF,
   mode = "scroll",
   changingMode = false,
   turnAnimation;
+let readingPage = 1;
+const currentPageNumber = () => mode === "scroll" ? readingPage : viewer.currentPageNumber;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+let motionEnabled = true;
+const canAnimate = () => motionEnabled && !reducedMotion.matches;
+reducedMotion.addEventListener("change", () => { if (!canAnimate()) turnAnimation?.cancel(); });
 const send = (type, value = {}) =>
   parent.postMessage(
     { channel: "the-den-reader", type, ...value },
@@ -43,7 +48,7 @@ const send = (type, value = {}) =>
 const position = () => {
   if (ready && !changingMode)
     send("position", {
-      page: viewer.currentPageNumber,
+      page: currentPageNumber(),
       totalPages: documentPDF.numPages,
     });
 };
@@ -96,7 +101,7 @@ nextEdge.addEventListener("click", () =>
 container.addEventListener("scroll", syncEdges, { passive: true });
 
 function setMode(nextMode) {
-  const currentPage = viewer.currentPageNumber;
+  const currentPage = currentPageNumber();
   changingMode = true;
   turnAnimation?.cancel();
   viewer.scrollMode =
@@ -115,6 +120,7 @@ function setMode(nextMode) {
   // page after both layout and scale have changed, including landscape pages.
   viewer.scrollPageIntoView({ pageNumber: currentPage });
   viewer.update();
+  readingPage = currentPage;
   changingMode = false;
   send("mode", { mode });
   send("zoom", { value: zoomValue() });
@@ -123,11 +129,36 @@ function setMode(nextMode) {
 }
 
 function goToPage(page) {
-  viewer.currentPageNumber = Math.max(1, Math.min(page, documentPDF.numPages));
+  readingPage = Math.max(1, Math.min(page, documentPDF.numPages));
+  viewer.currentPageNumber = readingPage;
+  // Even a clamped request for the current page must correct the toolbar input.
+  position();
+}
+
+function changePageGeometry(update, preserveOffset = false) {
+  const currentPage = currentPageNumber();
+  const page = viewer.getPageView(currentPage - 1)?.div;
+  const offset = page ? (container.scrollTop - page.offsetTop) / page.clientHeight : 0;
+  changingMode = true;
+  try {
+    viewer.currentPageNumber = currentPage;
+    update();
+    // PDFViewer's cached location can still refer to the previous page during
+    // quick navigation. Explicitly preserve the selected page through reflow.
+    viewer.scrollPageIntoView({pageNumber:currentPage});
+    if (preserveOffset && mode === "scroll" && page)
+      container.scrollTop = page.offsetTop + offset * page.clientHeight;
+    viewer.update();
+  } finally { changingMode = false; }
+  readingPage = currentPage;
+  position();
+  send("zoom", {value:zoomValue()});
+  requestAnimationFrame(syncPan);
 }
 
 eventBus.on("pagesinit", () => {
-  viewer.currentPageNumber = Math.min(initialPage, documentPDF.numPages);
+  readingPage = Math.min(initialPage, documentPDF.numPages);
+  viewer.currentPageNumber = readingPage;
   setMode(mode);
   ready = true;
   position();
@@ -135,7 +166,7 @@ eventBus.on("pagesinit", () => {
   container.focus({ preventScroll: true });
 });
 eventBus.on("pagechanging", ({ pageNumber, previous }) => {
-  position();
+  if (mode === "flip") position();
   if (!ready || changingMode || mode !== "flip") return;
   // Wait for PDFViewer to attach the new page before animating its arrival.
   requestAnimationFrame(() => {
@@ -147,7 +178,7 @@ eventBus.on("pagechanging", ({ pageNumber, previous }) => {
     const page = container.querySelector(
       `.page[data-page-number="${pageNumber}"]`,
     );
-    if (!page || reducedMotion.matches) return;
+    if (!page || !canAnimate()) return;
     const direction = pageNumber > previous ? 1 : -1;
     turnAnimation = page.animate(
       [
@@ -164,6 +195,14 @@ eventBus.on("pagechanging", ({ pageNumber, previous }) => {
     );
     turnAnimation.finished.then(syncEdges, () => {});
   });
+});
+eventBus.on("updateviewarea", ({location}) => {
+  if (ready && !changingMode && mode === "scroll") {
+    // Follow the leading visible page, not the page with the largest visible
+    // percentage. A short landscape page must not be skipped in a tall viewport.
+    readingPage = location.pageNumber;
+    position();
+  }
 });
 eventBus.on("pagerendered", ({ error }) => {
   if (error)
@@ -193,6 +232,11 @@ window.addEventListener("message", async (event) => {
   )
     return;
   const message = event.data;
+  if (message.type === "motion") {
+    motionEnabled = message.enabled !== false;
+    if (!canAnimate()) turnAnimation?.cancel();
+    return;
+  }
   if (
     message.type === "open" &&
     Number.isSafeInteger(message.id) &&
@@ -203,6 +247,7 @@ window.addEventListener("message", async (event) => {
       ? Math.max(1, message.page)
       : 1;
     mode = message.mode === "flip" ? "flip" : "scroll";
+    motionEnabled = message.motion !== false;
     try {
       loadTask = pdfjs.getDocument({
         url: (() => {
@@ -251,13 +296,14 @@ window.addEventListener("message", async (event) => {
     )
       setMode(message.mode);
     if (message.type === "zoom") {
-      if (message.value === "fit") viewer.currentScaleValue = "page-width";
-      else if (message.value === "page") viewer.currentScaleValue = "page-fit";
+      if (message.value === "fit") changePageGeometry(() => { viewer.currentScaleValue = "page-width"; }, true);
+      else if (message.value === "page") changePageGeometry(() => { viewer.currentScaleValue = "page-fit"; }, true);
       else if (Number(message.value) >= 0.25 && Number(message.value) <= 5)
-        viewer.currentScale = Number(message.value);
+        changePageGeometry(() => { viewer.currentScale = Number(message.value); }, true);
     }
-    if (message.type === "rotate")
-      viewer.pagesRotation = (viewer.pagesRotation + 90) % 360;
+    if (message.type === "rotate") {
+      changePageGeometry(() => { viewer.pagesRotation = (viewer.pagesRotation + 90) % 360; });
+    }
   }
 });
 document.addEventListener("keydown", (event) => {
@@ -265,11 +311,11 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") send("close");
   if (event.key === "ArrowRight" && ready) {
     event.preventDefault();
-    goToPage(viewer.currentPageNumber + 1);
+    goToPage(currentPageNumber() + 1);
   }
   if (event.key === "ArrowLeft" && ready) {
     event.preventDefault();
-    goToPage(viewer.currentPageNumber - 1);
+    goToPage(currentPageNumber() - 1);
   }
   if (mode === "flip" && ready && ["PageDown", "PageUp"].includes(event.key)) {
     event.preventDefault();
@@ -284,7 +330,7 @@ function settlePage() {
   if (!swipedPage) return;
   const page = swipedPage, from = page.style.transform;
   page.style.removeProperty("transform");
-  if (from && !reducedMotion.matches)
+  if (from && canAnimate())
     turnAnimation = page.animate([{transform:from}, {transform:"none"}], {duration:180, easing:"ease-out"});
   swipedPage = null;
 }
@@ -297,7 +343,7 @@ bindHorizontalDrag(container, {
     swipedPage = viewer.getPageView(viewer.currentPageNumber - 1)?.div;
   },
   onMove:({dx}) => {
-    if (swipedPage && !reducedMotion.matches)
+    if (swipedPage && canAnimate())
       swipedPage.style.transform = `translateX(${Math.max(-70, Math.min(70, dx * .35))}px)`;
   },
   onEnd:({dx, dy, elapsed}) => {
@@ -323,10 +369,7 @@ window.addEventListener("resize", () => {
     // continuous reading position when the fitted paper width is unchanged.
     const scale = viewer.currentScaleValue;
     if (scale === "page-fit" || (scale === "page-width" && widthChanged)) {
-      const page = viewer.getPageView(viewer.currentPageNumber - 1)?.div;
-      const offset = page ? (container.scrollTop - page.offsetTop) / page.clientHeight : 0;
-      viewer.currentScaleValue = scale;
-      if (mode === "scroll" && page) container.scrollTop = page.offsetTop + offset * page.clientHeight;
+      changePageGeometry(() => { viewer.currentScaleValue = scale; }, true);
     }
     viewer.update();
     syncPan();

@@ -122,7 +122,10 @@ function revealCategory(button) {
 }
 const libraryAnimations = new Set();
 let departingBooks = null;
+let touchedSpine, shelfOffset = 0, shelfReturn;
 function stopLibraryMotion() {
+  shelfReturn?.cancel();
+  $("#shelves").style.removeProperty("translate");
   for (const animation of libraryAnimations) animation.cancel();
   libraryAnimations.clear();
   departingBooks?.remove();
@@ -231,7 +234,7 @@ function renderBooks({animate = false} = {}) {
   const columns = shelfColumns();
   lastColumns = columns;
   const rows = Math.max(1, Math.ceil(list.length / columns));
-  for (let r = 0; r < rows; r++) {
+  for (let r = 0; view === "shelves" && r < rows; r++) {
     const shelf = document.createElement("div");
     shelf.className = "shelf";
     shelf.dataset.layoutKey = `board-${r}`;
@@ -267,7 +270,7 @@ function renderBooks({animate = false} = {}) {
     shelf.append(row);
     $("#shelves").append(shelf);
   }
-  $("#catalogue").replaceChildren(...list.map(book => {
+  $("#catalogue").replaceChildren(...(view === "catalogue" ? list : []).map(book => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "catalogue-item";
@@ -448,7 +451,11 @@ bindHorizontalDrag($("#book-stage"), {
     targetX = -8;
     animateBook();
   },
-  onCancel:() => { $("#book-stage").classList.remove("is-held"); },
+  onCancel:() => {
+    const held = $("#book-stage").classList.contains("is-held");
+    $("#book-stage").classList.remove("is-held");
+    if (held) { targetX = -8; animateBook(); }
+  },
 });
 $("#rotate-left").addEventListener("click", () => {
   targetY -= 45;
@@ -464,10 +471,11 @@ function setMotion() {
   $("#motion").checked = motion;
   animateBook();
   savePrefs();
+  document.dispatchEvent(new Event("den-motion-change"));
 }
 setMotion();
 matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", event => {
-  if (event.matches) stopLibraryMotion();
+  if (event.matches) { motion = false; setMotion(); }
 });
 $("#motion").addEventListener("change", (e) => {
   motion =
@@ -493,7 +501,6 @@ function selectCategory(button) {
 $("#categories").addEventListener("click", (e) => {
   selectCategory(e.target.closest("[data-category]"));
 });
-let touchedSpine, shelfOffset = 0, shelfReturn;
 const clearSpineTouch = () => { touchedSpine?.classList.remove("touch-held"); touchedSpine = null; };
 function settleShelves() {
   clearSpineTouch();
@@ -795,7 +802,7 @@ const reader = setupReader({
   onClose: () => {
     if (selected) {
       selected = books.find((book) => book.id === selected.id) || selected;
-      showBook(selected);
+      showBook(selected, false);
     }
     renderBooks();
   },
@@ -824,7 +831,7 @@ let resizeTimer = 0;
 new ResizeObserver(() => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
-    if ($("#reader").hidden && shelfColumns() !== lastColumns) renderBooks();
+    if (view === "shelves" && $("#reader").hidden && shelfColumns() !== lastColumns) renderBooks();
   }, 180);
 }).observe($("#library-main"));
 async function init() {

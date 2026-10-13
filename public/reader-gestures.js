@@ -70,6 +70,7 @@ export function bindHorizontalDrag(element, {
     if (start?.id === event.pointerId) cancel();
   });
   element.addEventListener("lostpointercapture", event => {
+    pointers.delete(event.pointerId);
     if (start?.id === event.pointerId) cancel();
   });
   element.addEventListener("click", event => {

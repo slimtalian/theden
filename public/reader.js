@@ -25,6 +25,8 @@ export function setupReader({ api, getBooks, onClose, toast }) {
       { channel: "the-den-reader", type, ...values },
       location.origin,
     );
+  const motionEnabled = () => !document.body.classList.contains("still");
+  document.addEventListener("den-motion-change", () => post("motion", {enabled:motionEnabled()}));
 
   function syncMode() {
     document.querySelectorAll("[data-reader-mode]").forEach((button) => {
@@ -44,6 +46,9 @@ export function setupReader({ api, getBooks, onClose, toast }) {
     if (!book || !total) return Promise.resolve();
     const currentBook = book,
       position = { page, totalPages: total };
+    // Reopening must use the last page immediately, even while a slow LAN save
+    // is pending. An older response must not overwrite a newer reading position.
+    currentBook.progress = position;
     const save = async () => {
       if (book === currentBook)
         $("#reader-save-status").textContent = "Saving…";
@@ -53,7 +58,7 @@ export function setupReader({ api, getBooks, onClose, toast }) {
           body: position,
         });
         const item = getBooks().find((item) => item.id === currentBook.id);
-        if (item) item.progress = result.progress;
+        if (item?.progress === position) item.progress = result.progress;
         if (book === currentBook)
           $("#reader-save-status").textContent =
             result.persisted === false
@@ -143,7 +148,7 @@ export function setupReader({ api, getBooks, onClose, toast }) {
     if (!book || closing) return;
     closing = true;
     clearTimeout(saveTimer);
-    const saving = savePosition();
+    savePosition();
     passwordPending = false;
     if ($("#password-dialog").open) $("#password-dialog").close();
     await sweep(
@@ -160,7 +165,6 @@ export function setupReader({ api, getBooks, onClose, toast }) {
         unlockLibraryScroll("reader");
       },
     );
-    await saving;
     book = null;
     total = 0;
     onClose();
@@ -179,7 +183,7 @@ export function setupReader({ api, getBooks, onClose, toast }) {
       return;
     const message = event.data;
     if (message.type === "ready")
-      post("open", { id: book.id, url: bookFileURL(book), page, mode });
+      post("open", { id: book.id, url: bookFileURL(book), page, mode, motion:motionEnabled() });
     if (message.type === "mode" && ["scroll", "flip"].includes(message.mode)) {
       mode = message.mode;
       syncMode();
@@ -226,7 +230,10 @@ export function setupReader({ api, getBooks, onClose, toast }) {
       $("#reader-error").hidden = false;
       $("#reader-save-status").textContent = "";
     }
-    if (message.type === "close") close();
+    if (message.type === "close") {
+      if (matchMedia("(max-width: 650px)").matches && $("#reader").classList.contains("tools-open")) setTools(false);
+      else close();
+    }
   });
   $("#password-form").addEventListener("submit", (event) => {
     event.preventDefault();
@@ -245,8 +252,8 @@ export function setupReader({ api, getBooks, onClose, toast }) {
   }
   $("#reader-tools-toggle").addEventListener("click", () =>
     setTools(!$("#reader").classList.contains("tools-open")));
-  $("#reader-tools").addEventListener("keydown", event => {
-    if (event.key === "Escape" && matchMedia("(max-width: 650px)").matches) {
+  $("#reader").addEventListener("keydown", event => {
+    if (event.key === "Escape" && matchMedia("(max-width: 650px)").matches && $("#reader").classList.contains("tools-open")) {
       event.stopPropagation();
       setTools(false);
       $("#reader-tools-toggle").focus({preventScroll:true});

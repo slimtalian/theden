@@ -188,7 +188,16 @@
     linear-gradient(90deg, #0009, #ffffff14 24%, transparent 52%, #0006),
     var(--cover);
 }
-.book-object .spine .spine-name { font-size: 13px; text-overflow: ellipsis; }
+.book-object .spine .spine-name {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: calc(var(--book-height) - 52px);
+  height: calc(var(--depth) - 8px);
+  max-height: none;
+  overflow: visible;
+  stroke: none;
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
 .book-object .spine .spine-format { position: absolute; bottom: 6px; margin: 0; font: 6px "Segoe UI", sans-serif; letter-spacing: 1px; opacity: .7; }
 .book-object .back .back-title { max-height: 100px; overflow: hidden; overflow-wrap: anywhere; }
 .book-object .back .back-author { font-size: 10px; }
