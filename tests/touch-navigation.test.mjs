@@ -59,6 +59,18 @@ test("cancelled drags recover and pausing before release does not fling", () => 
   assert.equal(ends.length, 1);
   assert.equal(ends[0].velocityX, 0);
 });
+test("losing capture without a pointer-up cannot disable later touch gestures", () => {
+  const {surface, ends} = gesture();
+  surface.emit("pointerdown");
+  surface.emit("pointermove", {clientX:170,timeStamp:30});
+  surface.emit("lostpointercapture", {timeStamp:40});
+  // The first finger was released outside this surface. A new touch gets a new id.
+  surface.emit("pointerdown", {pointerId:2,timeStamp:500});
+  surface.emit("pointermove", {pointerId:2,clientX:100,timeStamp:600});
+  surface.emit("pointerup", {pointerId:2,clientX:80,timeStamp:650});
+  assert.equal(ends.length, 1);
+  assert.equal(swipePageDelta(ends[0].dx, ends[0].dy, ends[0].elapsed), 1);
+});
 test("nested book and reader views restore the original library scroll only on final return", () => {
   const globals = ["document", "window", "getComputedStyle"];
   const originals = globals.map(key => Object.getOwnPropertyDescriptor(globalThis,key));
