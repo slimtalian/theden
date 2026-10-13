@@ -27,6 +27,7 @@ const applicationFiles = [
   "styles.css",
   "polish.css",
   "app.js",
+  "shelf-preview.js",
   "library-client.js",
   "demo-library.js",
   "books-mark.svg",
