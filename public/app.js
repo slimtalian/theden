@@ -7,6 +7,7 @@ import {
 import { createReaderTransition, lockLibraryScroll, unlockLibraryScroll } from "./reader-transition.js";
 import { bindHorizontalDrag, swipePageDelta } from "./reader-gestures.js";
 import { setupReader } from "./reader.js";
+import { setupShelfPreview } from "./shelf-preview.js";
 import { bookDesign, makeBookObject, makeCatalogueCover, coverKey, usesClothJacket } from "./book-design.js";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
@@ -122,7 +123,8 @@ function revealCategory(button) {
 }
 const libraryAnimations = new Set();
 let departingBooks = null;
-let touchedSpine, shelfOffset = 0, shelfReturn;
+let shelfOffset = 0, shelfReturn;
+let resetShelfPreview = () => {};
 function stopLibraryMotion() {
   shelfReturn?.cancel();
   $("#shelves").style.removeProperty("translate");
@@ -212,6 +214,7 @@ function shelfColumns() {
 }
 function renderBooks({animate = false} = {}) {
   if (!loaded) return;
+  resetShelfPreview();
   const scrollTop = $("#library-scroll").scrollTop;
   const before = captureLibraryLayout(animate);
   const list = filtered();
@@ -251,7 +254,7 @@ function renderBooks({animate = false} = {}) {
         `Hold ${book.title} by ${book.authors}`,
       );
       button.setAttribute("aria-pressed", String(book.id === selected?.id));
-      button.title = `${book.title} — ${book.authors}`;
+      button.setAttribute('aria-description', 'Pause to preview. Tap or click to open.');
       button.style.setProperty("--volume-height", `${design.height}px`);
       button.style.setProperty("--volume-width", `${design.depth + 8}px`);
       button.append(makeBookObject(book, {jacket:usesJacket(book)}));
@@ -350,6 +353,7 @@ function setBookRoom(active) {
 }
 async function openInspector(book) {
   if (changingBook || !$("#reader").hidden) return;
+  resetShelfPreview();
   changingBook = true;
   shelfScroll = $("#library-scroll").scrollTop;
   document.activeElement?.blur();
@@ -501,9 +505,12 @@ function selectCategory(button) {
 $("#categories").addEventListener("click", (e) => {
   selectCategory(e.target.closest("[data-category]"));
 });
-const clearSpineTouch = () => { touchedSpine?.classList.remove("touch-held"); touchedSpine = null; };
+resetShelfPreview = setupShelfPreview($("#shelves"), {
+  getBook:id => books.find(book => book.id === id),
+  canStart:() => view === 'shelves' && !selected && !changingBook && !libraryAnimations.size && !document.querySelector('dialog[open]'),
+  motion:() => motion,
+});
 function settleShelves() {
-  clearSpineTouch();
   const shelf = $("#shelves"), from = shelf.style.translate;
   shelf.style.removeProperty("translate");
   if (from && motion) shelfReturn = shelf.animate([{translate:from}, {translate:"0px"}], {duration:240, easing:"ease-out"});
@@ -511,19 +518,17 @@ function settleShelves() {
 }
 bindHorizontalDrag($("#shelves"), {
   canStart:event => !selected && !changingBook && $$("#categories button").length > 1
+    && !event.target.closest('.volume')
     && event.clientX > 20 && event.clientX < innerWidth - 20,
-  onPress:event => {
+  onPress:() => {
+    resetShelfPreview();
     shelfReturn?.cancel();
-    touchedSpine = event.target.closest(".volume");
-    touchedSpine?.classList.add("touch-held");
   },
-  onStart:clearSpineTouch,
   onMove:({dx}) => {
     shelfOffset = Math.max(-52, Math.min(52, dx * .28));
     if (motion) $("#shelves").style.translate = `${shelfOffset}px 0`;
   },
   onEnd:({dx, dy, elapsed}) => {
-    clearSpineTouch();
     const items = $$("#categories button");
     const next = items.findIndex(button => button.dataset.category === category) + swipePageDelta(dx, dy, elapsed);
     if (items[next] && items[next].dataset.category !== category) selectCategory(items[next]);
