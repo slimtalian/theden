@@ -23,13 +23,13 @@ The Den is a local library companion to [Tumbleweed](https://slimtalian.github.i
 
 | | GitHub Pages demo | Your local app |
 | --- | --- | --- |
-| Books | Six original short essays about the 1800s | Starts empty; add your own |
+| Books | Six original history essays: Animals, Geography, Inventions | Starts empty; add your own |
 | Library management | Read-only sample collection | calibre, with a separate managed library |
 | Reading positions | This browser's local storage | Local JSON, with a previous-state backup |
 | Imports | Unavailable; nothing is uploaded | PDF and EPUB, up to 100 MB each |
 | Server | Static files on GitHub Pages | Node.js on your computer |
 
-The samples are modern introductory essays, not recovered nineteenth-century texts. Each PDF has a cover, two short reading sections, and source notes. Covers and writing were made for this demo. The collection is never automatically imported into your local library.
+The samples are modern introductory essays, not recovered historical texts. Each PDF has a cover, two short reading sections, and source notes. Covers and writing were made for this demo. The collection is never automatically imported into your local library.
 
 ## Make it yours
 
