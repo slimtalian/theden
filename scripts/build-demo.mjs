@@ -48,11 +48,12 @@ for (const file of applicationFiles)
 let html = await fs.readFile(path.join(output, "index.html"), "utf8");
 html = html
   .replace('data-mode="local"', 'data-mode="demo"')
-  .replace("The Den · Your library", "The Den · A century on the shelf")
+  .replace("The Den · Your library", "The Den · Histories on the shelf")
   .replace(
     "The Den — your local personal library, managed by calibre.",
-    "Explore an interactive bookshelf of six original short books about the 1800s. The Den is a local library you can make your own.",
+    "Explore an interactive bookshelf of six original short history books about animals, inventions, and geography. The Den is a local library you can make your own.",
   );
+html = html.replace('<div class="category-rail"', '<p class="demo-swipe-hint">Animals · Geography · Inventions<br>Swipe left or right on empty shelf space to change category.</p><div class="category-rail"');
 await fs.writeFile(path.join(output, "index.html"), html);
 await fs.writeFile(path.join(output, ".nojekyll"), "");
 
