@@ -855,7 +855,7 @@ async function init() {
 }
 if (isDemo) {
   document.body.classList.add("demo-library");
-  document.title = "The Den · A century on the shelf";
+  document.title = "The Den · Histories on the shelf";
   $("#local-settings").hidden = true;
   $("#demo-settings").hidden = false;
   $("#add-button").setAttribute("aria-label", "Add your own books");

@@ -219,3 +219,5 @@ body:not(.still) .volume.shelf-lifted .ribbon { transform: translateY(-14px); }
   body:not(.still) .volume.shelf-lifted .book-object { transform: rotateY(87deg); }
   body:not(.still) .volume.shelf-lifted .ribbon { transform: none; }
 }
+
+.demo-swipe-hint { color: #c4b78e; font: 12px/1.6 "Segoe UI", sans-serif; margin: 0 0 8px; }
